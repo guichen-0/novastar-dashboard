@@ -119,8 +119,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Center - Globe Area */}
-        <div className="col-span-5 flex items-center justify-center relative">
-          <Globe />
+        <div className="col-span-5 relative overflow-hidden" style={{ minHeight: 0 }}>
+          <div className="w-full h-full min-h-[300px]">
+            <Globe />
+          </div>
 
           {/* Floating Stats */}
           <div className="absolute top-4 right-4">

@@ -38,7 +38,7 @@ export default function EarthPage() {
 
       <div className="grid grid-cols-12 gap-4 flex-1">
         {/* Globe - Full width */}
-        <div className="col-span-12 relative" style={{ minHeight: 500 }}>
+        <div className="col-span-12 relative overflow-hidden" style={{ height: 500 }}>
           <Globe />
 
           {/* Floating Stats */}
