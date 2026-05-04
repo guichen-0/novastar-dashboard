@@ -1,237 +1,68 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import React, { useRef, useMemo, useState, useEffect } from "react";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
-/* ── Simplified continent outlines (lon, lat pairs) ─────────────── */
-const CONTINENTS: [number, number][][] = [
-  // North America
-  [
-    [-130, 55], [-125, 60], [-120, 62], [-110, 65], [-100, 68],
-    [-85, 70], [-75, 62], [-65, 60], [-55, 52], [-60, 47],
-    [-67, 44], [-70, 42], [-75, 35], [-80, 32], [-82, 25],
-    [-90, 20], [-95, 18], [-105, 20], [-115, 30], [-120, 34],
-    [-125, 42], [-130, 55],
-  ],
-  // South America
-  [
-    [-80, 10], [-75, 5], [-70, 2], [-60, -3], [-50, -2],
-    [-45, -5], [-38, -8], [-35, -12], [-38, -18], [-42, -22],
-    [-48, -28], [-52, -32], [-58, -38], [-65, -42], [-70, -48],
-    [-72, -52], [-75, -50], [-74, -45], [-72, -38], [-70, -30],
-    [-72, -20], [-75, -10], [-78, -2], [-80, 5], [-80, 10],
-  ],
-  // Europe
-  [
-    [-10, 36], [-5, 36], [0, 38], [3, 43], [0, 47],
-    [-5, 48], [-10, 52], [-8, 58], [5, 62], [10, 58],
-    [12, 55], [18, 55], [22, 58], [28, 60], [30, 65],
-    [32, 70], [28, 72], [20, 70], [15, 65], [10, 60],
-    [5, 55], [0, 50], [5, 44], [10, 42], [15, 38],
-    [18, 36], [12, 36], [5, 36], [-10, 36],
-  ],
-  // Africa
-  [
-    [-15, 35], [-5, 36], [10, 37], [12, 33], [20, 32],
-    [25, 30], [32, 30], [35, 28], [38, 22], [42, 12],
-    [50, 10], [52, 5], [48, 0], [42, -5], [40, -12],
-    [38, -20], [35, -25], [30, -30], [28, -33], [20, -35],
-    [18, -33], [15, -28], [12, -22], [10, -10], [8, 0],
-    [5, 5], [0, 5], [-5, 5], [-8, 5], [-12, 8],
-    [-15, 12], [-18, 18], [-17, 22], [-15, 28], [-15, 35],
-  ],
-  // Asia
-  [
-    [30, 70], [40, 68], [50, 65], [60, 70], [70, 72],
-    [80, 70], [100, 68], [120, 65], [130, 60], [140, 55],
-    [145, 50], [150, 48], [145, 42], [140, 38], [135, 35],
-    [130, 30], [122, 25], [120, 22], [115, 18], [110, 15],
-    [108, 12], [105, 10], [100, 5], [98, 2], [100, 0],
-    [95, 5], [90, 10], [88, 15], [85, 20], [80, 22],
-    [75, 28], [70, 30], [65, 25], [60, 25], [55, 28],
-    [50, 30], [45, 32], [40, 37], [35, 37], [30, 35],
-    [28, 42], [30, 48], [35, 55], [32, 60], [30, 65],
-    [30, 70],
-  ],
-  // Australia
-  [
-    [115, -15], [120, -14], [130, -12], [135, -12], [140, -15],
-    [145, -15], [150, -22], [153, -28], [150, -33], [148, -38],
-    [145, -38], [140, -35], [135, -33], [130, -32], [125, -33],
-    [118, -35], [115, -32], [114, -28], [113, -24], [115, -20],
-    [115, -15],
-  ],
-  // Greenland
-  [
-    [-55, 60], [-50, 62], [-42, 65], [-35, 68], [-25, 72],
-    [-18, 76], [-20, 80], [-30, 82], [-45, 82], [-55, 78],
-    [-60, 74], [-55, 70], [-52, 65], [-55, 60],
-  ],
-  // Antarctica (simplified)
-  [
-    [-60, -65], [-30, -70], [0, -72], [30, -70], [60, -68],
-    [90, -70], [120, -68], [150, -70], [180, -72],
-    [-180, -72], [-150, -70], [-120, -68], [-90, -70], [-60, -65],
-  ],
-];
+/* ── Earth texture from NASA Blue Marble (public domain) ─────────── */
+const EARTH_TEXTURE_URL =
+  "https://unpkg.com/three-globe@2.41.12/example/img/earth-blue-marble.jpg";
+const EARTH_BUMP_URL =
+  "https://unpkg.com/three-globe@2.41.12/example/img/earth-topology.png";
 
-/* ── Point-in-polygon for lat/lng → equirectangular canvas ─────── */
-function pointInPolygon(
-  lon: number,
-  lat: number,
-  polygon: [number, number][]
-): boolean {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i][0], yi = polygon[i][1];
-    const xj = polygon[j][0], yj = polygon[j][1];
-    if (
-      yi > lat !== yj > lat &&
-      lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi
-    ) {
-      inside = !inside;
-    }
-  }
-  return inside;
-}
-
-function isLand(lon: number, lat: number): boolean {
-  for (const continent of CONTINENTS) {
-    if (pointInPolygon(lon, lat, continent)) return true;
-  }
-  return false;
-}
-
-/* ── Generate Earth texture on canvas ───────────────────────────── */
-function generateEarthTexture(): THREE.CanvasTexture {
-  const w = 2048;
-  const h = 1024;
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d")!;
-
-  // Ocean gradient
-  const oceanGrad = ctx.createLinearGradient(0, 0, 0, h);
-  oceanGrad.addColorStop(0, "#051525");
-  oceanGrad.addColorStop(0.3, "#081e33");
-  oceanGrad.addColorStop(0.5, "#0a2240");
-  oceanGrad.addColorStop(0.7, "#081e33");
-  oceanGrad.addColorStop(1, "#051525");
-  ctx.fillStyle = oceanGrad;
-  ctx.fillRect(0, 0, w, h);
-
-  // Draw continents pixel-by-pixel
-  const imageData = ctx.getImageData(0, 0, w, h);
-  const data = imageData.data;
-
-  for (let py = 0; py < h; py++) {
-    for (let px = 0; px < w; px++) {
-      const lon = (px / w) * 360 - 180;
-      const lat = 90 - (py / h) * 180;
-
-      if (isLand(lon, lat)) {
-        const idx = (py * w + px) * 4;
-        // Land: dark teal with slight variation
-        const variation = Math.sin(lon * 0.1) * Math.cos(lat * 0.1) * 10;
-        data[idx] = 8 + variation;       // R
-        data[idx + 1] = 32 + variation;   // G
-        data[idx + 2] = 28 + variation;   // B
-        data[idx + 3] = 255;
-      }
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-
-  // Add coastline glow
-  const coastCanvas = document.createElement("canvas");
-  coastCanvas.width = w;
-  coastCanvas.height = h;
-  const coastCtx = coastCanvas.getContext("2d")!;
-  coastCtx.putImageData(imageData, 0, 0);
-
-  // Edge detection for coastlines
-  for (let py = 1; py < h - 1; py++) {
-    for (let px = 1; px < w - 1; px++) {
-      const lon = (px / w) * 360 - 180;
-      const lat = 90 - (py / h) * 180;
-      const current = isLand(lon, lat);
-
-      // Check 4 neighbors
-      const neighbors = [
-        isLand(((px + 1) / w) * 360 - 180, 90 - (py / h) * 180),
-        isLand(((px - 1) / w) * 360 - 180, 90 - (py / h) * 180),
-        isLand((px / w) * 360 - 180, 90 - ((py + 1) / h) * 180),
-        isLand((px / w) * 360 - 180, 90 - ((py - 1) / h) * 180),
-      ];
-
-      const hasEdge = neighbors.some((n) => n !== current);
-      if (hasEdge) {
-        const idx = (py * w + px) * 4;
-        data[idx] = 0;
-        data[idx + 1] = 200;
-        data[idx + 2] = 230;
-        data[idx + 3] = 255;
-      }
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
-  return texture;
-}
-
-/* ── 3D Components ──────────────────────────────────────────────── */
-function EarthSphere() {
+/* ── 3D Components ───────────────────────────────────────────────── */
+function EarthSphere({
+  earthMap,
+  earthBump,
+}: {
+  earthMap: THREE.Texture;
+  earthBump: THREE.Texture;
+}) {
   const globeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Group>(null);
-  const texture = useMemo(() => generateEarthTexture(), []);
 
   useFrame((_, delta) => {
     if (globeRef.current) {
-      globeRef.current.rotation.y += delta * 0.06;
+      globeRef.current.rotation.y += delta * 0.05;
     }
     if (glowRef.current) {
-      glowRef.current.rotation.y += delta * 0.06;
+      glowRef.current.rotation.y += delta * 0.05;
     }
   });
 
   return (
     <group ref={glowRef}>
-      {/* Earth sphere */}
+      {/* Earth sphere with real texture */}
       <mesh ref={globeRef}>
         <sphereGeometry args={[1, 64, 64]} />
         <meshStandardMaterial
-          map={texture}
-          roughness={0.85}
+          map={earthMap}
+          bumpMap={earthBump}
+          bumpScale={0.02}
+          roughness={0.7}
           metalness={0.05}
         />
       </mesh>
 
-      {/* Inner atmosphere glow */}
+      {/* Atmosphere glow - inner */}
       <mesh>
-        <sphereGeometry args={[1.08, 32, 32]} />
+        <sphereGeometry args={[1.06, 64, 64]} />
         <meshBasicMaterial
-          color="#00E5FF"
+          color="#4da6ff"
           transparent
-          opacity={0.04}
+          opacity={0.06}
           side={THREE.BackSide}
         />
       </mesh>
 
-      {/* Outer atmosphere glow */}
+      {/* Atmosphere glow - outer */}
       <mesh>
-        <sphereGeometry args={[1.2, 32, 32]} />
+        <sphereGeometry args={[1.18, 64, 64]} />
         <meshBasicMaterial
-          color="#00E5FF"
+          color="#4da6ff"
           transparent
-          opacity={0.018}
+          opacity={0.025}
           side={THREE.BackSide}
         />
       </mesh>
@@ -244,7 +75,7 @@ function DataPoints() {
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.06;
+      groupRef.current.rotation.y += delta * 0.05;
     }
   });
 
@@ -281,12 +112,17 @@ function DataPoints() {
       {points.map((pos, i) => (
         <group key={i}>
           <mesh position={pos}>
-            <sphereGeometry args={[0.012, 8, 8]} />
+            <sphereGeometry args={[0.01, 8, 8]} />
             <meshBasicMaterial color="#00E5FF" />
           </mesh>
           <mesh position={pos}>
-            <ringGeometry args={[0.02, 0.032, 16]} />
-            <meshBasicMaterial color="#00E5FF" transparent opacity={0.25} side={THREE.DoubleSide} />
+            <ringGeometry args={[0.018, 0.028, 16]} />
+            <meshBasicMaterial
+              color="#00E5FF"
+              transparent
+              opacity={0.3}
+              side={THREE.DoubleSide}
+            />
           </mesh>
         </group>
       ))}
@@ -299,7 +135,7 @@ function ArcLines() {
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.06;
+      groupRef.current.rotation.y += delta * 0.05;
     }
   });
 
@@ -341,10 +177,13 @@ function ArcLines() {
           <bufferGeometry>
             <bufferAttribute
               attach="attributes-position"
-              args={[new Float32Array(points.flatMap((p) => [p.x, p.y, p.z])), 3]}
+              args={[
+                new Float32Array(points.flatMap((p) => [p.x, p.y, p.z])),
+                3,
+              ]}
             />
           </bufferGeometry>
-          <lineBasicMaterial color="#00E5FF" transparent opacity={0.18} />
+          <lineBasicMaterial color="#00E5FF" transparent opacity={0.2} />
         </line>
       ))}
     </group>
@@ -372,32 +211,79 @@ function SatelliteOrbits() {
   );
 }
 
-/* ── Canvas wrapper with proper containment ─────────────────────── */
+/* ── Main Globe component ────────────────────────────────────────── */
+function GlobeScene() {
+  const [loaded, setLoaded] = useState(false);
+  const [earthMap, earthBump] = useLoader(THREE.TextureLoader, [
+    EARTH_TEXTURE_URL,
+    EARTH_BUMP_URL,
+  ]);
+
+  useEffect(() => {
+    setLoaded(true);
+  }, []);
+
+  return (
+    <>
+      <ambientLight intensity={0.35} />
+      <pointLight position={[5, 3, 5]} intensity={0.9} />
+      <pointLight position={[-5, -2, -5]} intensity={0.15} color="#8B5CF6" />
+
+      <EarthSphere earthMap={earthMap} earthBump={earthBump} />
+      <DataPoints />
+      <ArcLines />
+      <SatelliteOrbits />
+
+      <OrbitControls
+        enableZoom={false}
+        enablePan={false}
+        autoRotate={false}
+        minPolarAngle={Math.PI / 4}
+        maxPolarAngle={(3 * Math.PI) / 4}
+      />
+    </>
+  );
+}
+
+/* ── Loading fallback ────────────────────────────────────────────── */
+function GlobeLoading() {
+  return (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="text-center">
+        <div
+          className="w-16 h-16 rounded-full border-2 border-[var(--cyan)] border-t-transparent animate-spin mx-auto"
+        />
+        <p
+          className="text-xs text-[var(--cyan)] mt-3"
+          style={{ fontFamily: "var(--font-orbitron)" }}
+        >
+          加载地球纹理...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Exported Globe with Suspense boundary ───────────────────────── */
 export function Globe() {
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       <Canvas
         camera={{ position: [0, 0, 3], fov: 45 }}
         style={{ width: "100%", height: "100%", background: "transparent" }}
         gl={{ alpha: true, antialias: true }}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
       >
-        <ambientLight intensity={0.25} />
-        <pointLight position={[5, 3, 5]} intensity={0.8} />
-        <pointLight position={[-5, -2, -5]} intensity={0.15} color="#8B5CF6" />
-
-        <EarthSphere />
-        <DataPoints />
-        <ArcLines />
-        <SatelliteOrbits />
-
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          autoRotate={false}
-          minPolarAngle={Math.PI / 4}
-          maxPolarAngle={(3 * Math.PI) / 4}
-        />
+        <React.Suspense fallback={null}>
+          <GlobeScene />
+        </React.Suspense>
       </Canvas>
     </div>
   );
