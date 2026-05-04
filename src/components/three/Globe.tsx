@@ -1,64 +1,116 @@
 "use client";
 
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
-/* ── Earth texture from NASA Blue Marble (public domain) ─────────── */
-const EARTH_TEXTURE_URL =
+/* ── NASA public domain textures (Blue Marble + Black Marble) ──── */
+const EARTH_DAY =
   "https://unpkg.com/three-globe@2.41.12/example/img/earth-blue-marble.jpg";
-const EARTH_BUMP_URL =
+const EARTH_NIGHT =
+  "https://unpkg.com/three-globe@2.41.12/example/img/earth-night.jpg";
+const EARTH_TOPOLOGY =
   "https://unpkg.com/three-globe@2.41.12/example/img/earth-topology.png";
 
-/* ── 3D Components ───────────────────────────────────────────────── */
+/* ── Day/Night shader ──────────────────────────────────────────── */
+const dayNightVertex = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  void main() {
+    vUv = uv;
+    vNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const dayNightFragment = `
+  uniform sampler2D dayTexture;
+  uniform sampler2D nightTexture;
+  uniform vec3 sunDirection;
+  varying vec2 vUv;
+  varying vec3 vNormal;
+
+  void main() {
+    vec4 dayColor = texture2D(dayTexture, vUv);
+    vec4 nightColor = texture2D(nightTexture, vUv);
+
+    float sunDot = dot(vNormal, sunDirection);
+
+    // 晨昏线：在 -0.1 到 0.1 之间平滑过渡
+    float dayFactor = smoothstep(-0.1, 0.1, sunDot);
+
+    // 夜间：只保留城市灯光（亮度 > 0.12 的像素），去掉黑色海洋
+    float lightBrightness = max(nightColor.r, max(nightColor.g, nightColor.b));
+    float lightMask = smoothstep(0.02, 0.18, lightBrightness);
+
+    // 白天：地球纹理 + 少量夜间灯光透出
+    vec3 dayResult = dayColor.rgb * dayFactor;
+
+    // 夜间：只显示灯光
+    vec3 nightResult = nightColor.rgb * lightMask * (1.0 - dayFactor);
+
+    // 混合
+    vec3 finalColor = dayResult + nightResult;
+
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+`;
+
+/* ── 3D Components ──────────────────────────────────────────────── */
 function EarthSphere({
-  earthMap,
-  earthBump,
+  dayTex,
+  nightTex,
+  bumpTex,
 }: {
-  earthMap: THREE.Texture;
-  earthBump: THREE.Texture;
+  dayTex: THREE.Texture;
+  nightTex: THREE.Texture;
+  bumpTex: THREE.Texture;
 }) {
   const globeRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<THREE.Group>(null);
+
+  const uniforms = useMemo(
+    () => ({
+      dayTexture: { value: dayTex },
+      nightTexture: { value: nightTex },
+      sunDirection: { value: new THREE.Vector3(1, 0.3, 0.5).normalize() },
+    }),
+    [dayTex, nightTex]
+  );
 
   useFrame((_, delta) => {
-    if (globeRef.current) {
-      globeRef.current.rotation.y += delta * 0.05;
-    }
-    if (glowRef.current) {
-      glowRef.current.rotation.y += delta * 0.05;
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.05;
     }
   });
 
   return (
-    <group ref={glowRef}>
-      {/* Earth sphere with real texture */}
+    <group ref={groupRef}>
+      {/* Earth sphere with day/night shader */}
       <mesh ref={globeRef}>
-        <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial
-          map={earthMap}
-          bumpMap={earthBump}
-          bumpScale={0.02}
-          roughness={0.7}
-          metalness={0.05}
+        <sphereGeometry args={[1, 128, 64]} />
+        <shaderMaterial
+          vertexShader={dayNightVertex}
+          fragmentShader={dayNightFragment}
+          uniforms={uniforms}
         />
       </mesh>
 
-      {/* Atmosphere glow - inner */}
+      {/* Atmosphere inner glow */}
       <mesh>
-        <sphereGeometry args={[1.06, 64, 64]} />
+        <sphereGeometry args={[1.05, 64, 64]} />
         <meshBasicMaterial
           color="#4da6ff"
           transparent
-          opacity={0.06}
+          opacity={0.07}
           side={THREE.BackSide}
         />
       </mesh>
 
-      {/* Atmosphere glow - outer */}
+      {/* Atmosphere outer glow */}
       <mesh>
-        <sphereGeometry args={[1.18, 64, 64]} />
+        <sphereGeometry args={[1.15, 64, 64]} />
         <meshBasicMaterial
           color="#4da6ff"
           transparent
@@ -112,11 +164,11 @@ function DataPoints() {
       {points.map((pos, i) => (
         <group key={i}>
           <mesh position={pos}>
-            <sphereGeometry args={[0.01, 8, 8]} />
+            <sphereGeometry args={[0.008, 8, 8]} />
             <meshBasicMaterial color="#00E5FF" />
           </mesh>
           <mesh position={pos}>
-            <ringGeometry args={[0.018, 0.028, 16]} />
+            <ringGeometry args={[0.015, 0.025, 16]} />
             <meshBasicMaterial
               color="#00E5FF"
               transparent
@@ -211,25 +263,21 @@ function SatelliteOrbits() {
   );
 }
 
-/* ── Main Globe component ────────────────────────────────────────── */
+/* ── Scene with textures loaded ─────────────────────────────────── */
 function GlobeScene() {
-  const [loaded, setLoaded] = useState(false);
-  const [earthMap, earthBump] = useLoader(THREE.TextureLoader, [
-    EARTH_TEXTURE_URL,
-    EARTH_BUMP_URL,
+  const [dayTex, nightTex, bumpTex] = useLoader(THREE.TextureLoader, [
+    EARTH_DAY,
+    EARTH_NIGHT,
+    EARTH_TOPOLOGY,
   ]);
-
-  useEffect(() => {
-    setLoaded(true);
-  }, []);
 
   return (
     <>
-      <ambientLight intensity={0.35} />
+      <ambientLight intensity={0.3} />
       <pointLight position={[5, 3, 5]} intensity={0.9} />
       <pointLight position={[-5, -2, -5]} intensity={0.15} color="#8B5CF6" />
 
-      <EarthSphere earthMap={earthMap} earthBump={earthBump} />
+      <EarthSphere dayTex={dayTex} nightTex={nightTex} bumpTex={bumpTex} />
       <DataPoints />
       <ArcLines />
       <SatelliteOrbits />
@@ -245,14 +293,12 @@ function GlobeScene() {
   );
 }
 
-/* ── Loading fallback ────────────────────────────────────────────── */
-function GlobeLoading() {
+/* ── Loading fallback ───────────────────────────────────────────── */
+function GlobeLoader() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="text-center">
-        <div
-          className="w-16 h-16 rounded-full border-2 border-[var(--cyan)] border-t-transparent animate-spin mx-auto"
-        />
+        <div className="w-14 h-14 rounded-full border-2 border-[var(--cyan)] border-t-transparent animate-spin mx-auto" />
         <p
           className="text-xs text-[var(--cyan)] mt-3"
           style={{ fontFamily: "var(--font-orbitron)" }}
@@ -264,7 +310,7 @@ function GlobeLoading() {
   );
 }
 
-/* ── Exported Globe with Suspense boundary ───────────────────────── */
+/* ── Exported Globe ─────────────────────────────────────────────── */
 export function Globe() {
   return (
     <div
@@ -275,16 +321,16 @@ export function Globe() {
         overflow: "hidden",
       }}
     >
-      <Canvas
-        camera={{ position: [0, 0, 3], fov: 45 }}
-        style={{ width: "100%", height: "100%", background: "transparent" }}
-        gl={{ alpha: true, antialias: true }}
-        resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
-      >
-        <React.Suspense fallback={null}>
+      <React.Suspense fallback={<GlobeLoader />}>
+        <Canvas
+          camera={{ position: [0, 0, 3], fov: 45 }}
+          style={{ width: "100%", height: "100%", background: "transparent" }}
+          gl={{ alpha: true, antialias: true }}
+          resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
+        >
           <GlobeScene />
-        </React.Suspense>
-      </Canvas>
+        </Canvas>
+      </React.Suspense>
     </div>
   );
 }
