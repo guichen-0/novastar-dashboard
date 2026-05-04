@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>太空科幻仪表盘</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 229, 255, 0.5);
+            opacity: 0.5;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+        }
+        .glass-panel {
+            background: rgba(17, 20, 21, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+        }
+        .holo-globe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glow-cyan-text {
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+        }
+        .glow-magenta-text {
+            text-shadow: 0 0 8px rgba(255, 0, 144, 0.8);
+        }
+        /* Custom scrollbar for terminal */
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: rgba(17, 20, 21, 0.5);
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 229, 255, 0.5);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#004f58",
+                      "on-background": "#e1e2e4",
+                      "tertiary-fixed": "#e9ddff",
+                      "tertiary-fixed-dim": "#d0bcff",
+                      "on-tertiary": "#3c0091",
+                      "on-primary-fixed": "#001f24",
+                      "on-secondary-fixed": "#3e001f",
+                      "background-hover": "#1F2937",
+                      "primary-fixed-dim": "#00daf3",
+                      "inverse-primary": "#006875",
+                      "surface-container-highest": "#323537",
+                      "success": "#22C55E",
+                      "on-tertiary-fixed": "#23005c",
+                      "on-surface-variant": "#bac9cc",
+                      "surface-dim": "#111415",
+                      "on-primary": "#00363d",
+                      "on-error": "#690005",
+                      "outline": "#849396",
+                      "background": "#0A0E1A",
+                      "surface": "#111415",
+                      "outline-variant": "#3b494c",
+                      "on-tertiary-fixed-variant": "#5516be",
+                      "surface-container": "#1d2022",
+                      "primary": "#c3f5ff",
+                      "surface-container-low": "#191c1e",
+                      "on-surface": "#e1e2e4",
+                      "on-primary-container": "#00626e",
+                      "on-error-container": "#ffdad6",
+                      "info": "#3B82F6",
+                      "surface-glass": "hsla(222, 47%, 8%, 0.8)",
+                      "secondary-fixed": "#ffd9e3",
+                      "surface-bright": "#37393b",
+                      "on-secondary": "#640035",
+                      "glow-magenta": "rgba(255, 0, 144, 0.5)",
+                      "surface-container-lowest": "#0c0f10",
+                      "secondary": "#ffb0ca",
+                      "warning": "#F59E0B",
+                      "error-container": "#93000a",
+                      "surface-tint": "#00daf3",
+                      "surface-container-high": "#282a2c",
+                      "inverse-on-surface": "#2e3132",
+                      "tertiary": "#f2e9ff",
+                      "primary-fixed": "#9cf0ff",
+                      "tertiary-container": "#d9c8ff",
+                      "background-alt": "#111827",
+                      "on-tertiary-container": "#6834d1",
+                      "on-secondary-container": "#58002e",
+                      "secondary-fixed-dim": "#ffb0ca",
+                      "primary-container": "#00e5ff",
+                      "on-secondary-fixed-variant": "#8d004d",
+                      "secondary-container": "#ff479a",
+                      "surface-variant": "#323537",
+                      "glow-cyan": "rgba(0, 229, 255, 0.5)",
+                      "inverse-surface": "#e1e2e4",
+                      "error": "#EF4444"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xl": "40px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "page-margin": "48px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "caption": [
+                              "Inter"
+                      ],
+                      "h2": [
+                              "Space Grotesk"
+                      ],
+                      "h3": [
+                              "Space Grotesk"
+                      ],
+                      "h1": [
+                              "Space Grotesk"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "data-display": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "h2": [
+                              "2.25rem",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "h3": [
+                              "1.75rem",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "h1": [
+                              "3rem",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-display": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body h-screen w-screen overflow-hidden relative selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-6 py-3 fixed top-0 z-50 bg-slate-950/40 backdrop-blur-xl border-b border-cyan-500/20 shadow-[0_0_20px_rgba(0,229,255,0.15)]">
+<div class="flex items-center gap-md">
+<span class="text-2xl font-black text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.8)] font-h1">NOVASTAR_OS</span>
+</div>
+<nav class="hidden md:flex gap-lg">
+<a class="text-cyan-900/60 font-h2 text-sm uppercase tracking-widest hover:text-cyan-300 hover:bg-cyan-500/10 transition-all duration-300 px-sm py-xs rounded" href="#">SYSTEM_CORE</a>
+<a class="text-cyan-400 border-b-2 border-cyan-400 pb-1 font-h2 text-sm uppercase tracking-widest hover:text-cyan-300 hover:bg-cyan-500/10 transition-all duration-300 px-sm py-xs" href="#">SATELLITE_NET</a>
+<a class="text-cyan-900/60 font-h2 text-sm uppercase tracking-widest hover:text-cyan-300 hover:bg-cyan-500/10 transition-all duration-300 px-sm py-xs rounded" href="#">DEEP_SPACE</a>
+<a class="text-cyan-900/60 font-h2 text-sm uppercase tracking-widest hover:text-cyan-300 hover:bg-cyan-500/10 transition-all duration-300 px-sm py-xs rounded" href="#">SYNC_HUB</a>
+</nav>
+<div class="flex items-center gap-md text-cyan-400">
+<button class="hover:text-cyan-300 hover:bg-cyan-500/10 p-sm rounded transition-all duration-300 scale-105 active:scale-95 cursor-crosshair">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+</button>
+<button class="hover:text-cyan-300 hover:bg-cyan-500/10 p-sm rounded transition-all duration-300 scale-105 active:scale-95 cursor-crosshair">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</button>
+<button class="hover:text-cyan-300 hover:bg-cyan-500/10 p-sm rounded transition-all duration-300 scale-105 active:scale-95 cursor-crosshair">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-cyan-900/50 border border-cyan-500/50 overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-cyan-400" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-slate-950/60 backdrop-blur-2xl h-screen w-20 hover:w-64 transition-all border-r border-cyan-500/20 shadow-[10px_0_30px_rgba(0,229,255,0.05)] rounded-r-lg group overflow-hidden">
+<div class="px-md pb-lg border-b border-cyan-500/20 mb-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+<h2 class="text-cyan-400 font-h3 text-sm">STATION_ALPHA</h2>
+<p class="text-cyan-900 text-xs font-caption">SECTOR_7_CONNECTED</p>
+</div>
+<div class="flex-1 flex flex-col gap-xs py-sm w-full">
+<button class="flex items-center gap-md w-full px-lg py-md text-cyan-900 opacity-50 hover:bg-cyan-500/10 hover:text-cyan-200 transition-all group-hover:translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+<span class="font-h3 text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">DASHBOARD</span>
+</button>
+<button class="flex items-center gap-md w-full px-lg py-md bg-cyan-500/20 text-cyan-400 border-r-4 border-cyan-400 shadow-[inset_0_0_15px_rgba(0,229,255,0.3)] transition-all group-hover:translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-h3 text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">NETWORK_3D</span>
+</button>
+<button class="flex items-center gap-md w-full px-lg py-md text-cyan-900 opacity-50 hover:bg-cyan-500/10 hover:text-cyan-200 transition-all group-hover:translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+<span class="font-h3 text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">APOD_FEED</span>
+</button>
+<button class="flex items-center gap-md w-full px-lg py-md text-cyan-900 opacity-50 hover:bg-cyan-500/10 hover:text-cyan-200 transition-all group-hover:translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-h3 text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">GITHUB_NET</span>
+</button>
+<button class="flex items-center gap-md w-full px-lg py-md text-cyan-900 opacity-50 hover:bg-cyan-500/10 hover:text-cyan-200 transition-all group-hover:translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-h3 text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">SYSTEM_LOG</span>
+</button>
+</div>
+<div class="mt-auto border-t border-cyan-500/20 pt-sm pb-lg w-full">
+<button class="flex items-center gap-md w-full px-lg py-md text-cyan-900 opacity-50 hover:bg-cyan-500/10 hover:text-cyan-200 transition-all group-hover:translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="help_center">help_center</span>
+<span class="font-h3 text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">SUPPORT</span>
+</button>
+<button class="flex items-center gap-md w-full px-lg py-md text-cyan-900 opacity-50 hover:bg-cyan-500/10 hover:text-cyan-200 transition-all group-hover:translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="power_settings_new">power_settings_new</span>
+<span class="font-h3 text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">REBOOT</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-20 pt-[60px] h-full w-[calc(100%-80px)] p-lg grid grid-cols-12 grid-rows-6 gap-md relative">
+<!-- Central Holographic Globe Area (Background Layer) -->
+<div class="col-span-12 row-span-6 absolute inset-0 -z-10 flex items-center justify-center pointer-events-none">
+<div class="relative w-[800px] h-[800px]">
+<!-- Simulated 3D Wireframe Globe -->
+<div class="absolute inset-0 rounded-full border border-cyan-500/30 shadow-[0_0_100px_rgba(0,229,255,0.2)_inset] flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/10 via-background to-background">
+<div class="w-full h-full rounded-full border border-cyan-500/10 absolute opacity-50" style="transform: rotateX(60deg);"></div>
+<div class="w-full h-full rounded-full border border-cyan-500/10 absolute opacity-50" style="transform: rotateX(120deg);"></div>
+<div class="w-full h-full rounded-full border border-cyan-500/10 absolute opacity-50" style="transform: rotateY(60deg);"></div>
+<div class="w-full h-full rounded-full border border-cyan-500/10 absolute opacity-50" style="transform: rotateY(120deg);"></div>
+</div>
+<!-- Satellites -->
+<div class="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-xs">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="satellite_alt">satellite_alt</span>
+<span class="text-[10px] text-secondary font-caption">降雨</span>
+</div>
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-xs">
+<span class="material-symbols-outlined text-warning text-sm" data-icon="sensors">sensors</span>
+<span class="text-[10px] text-warning font-caption">地震</span>
+</div>
+<!-- Orbit Rings -->
+<div class="absolute inset-[-100px] rounded-full border border-cyan-500/20 border-dashed opacity-30"></div>
+<div class="absolute inset-[-200px] rounded-full border border-magenta-500/20 border-dashed opacity-20"></div>
+</div>
+</div>
+<!-- Left Column: Terminal & NASA -->
+<div class="col-span-3 row-span-5 flex flex-col gap-md z-10">
+<!-- Real-time Data Terminal -->
+<div class="glass-panel flex-1 rounded-lg p-md flex flex-col relative overflow-hidden group">
+<div class="scan-line hidden group-hover:block"></div>
+<div class="flex items-center justify-between mb-sm border-b border-cyan-500/20 pb-xs">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-cyan-400 text-sm" data-icon="terminal">terminal</span>
+<h3 class="font-h3 text-sm text-cyan-400 uppercase tracking-widest">系统数据流</h3>
+</div>
+<span class="material-symbols-outlined text-cyan-900 text-xs" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<div class="flex-1 overflow-y-auto terminal-scroll font-caption text-xs text-on-surface-variant leading-relaxed">
+<p><span class="text-primary-container">SYS&gt;</span> 初始化全球监测网络...</p>
+<p><span class="text-primary-container">SYS&gt;</span> 卫星连接确立: [OK]</p>
+<p><span class="text-secondary">WARN&gt;</span> 探测到微小轨道偏差 (0.002%)</p>
+<p><span class="text-primary-container">DATA&gt;</span> 接收气候矩阵包 [1024kb]</p>
+<p><span class="text-primary-container">SYS&gt;</span> 同步时间戳: 2045.10.24-11:00</p>
+<p><span class="text-primary-container">DATA&gt;</span> 地震活动日志更新.</p>
+</div>
+</div>
+<!-- NASA Dynamic Feed -->
+<div class="glass-panel h-[200px] rounded-lg p-md flex flex-col relative overflow-hidden group">
+<div class="scan-line hidden group-hover:block"></div>
+<div class="flex items-center justify-between mb-sm border-b border-cyan-500/20 pb-xs">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-cyan-400 text-sm" data-icon="rocket">rocket</span>
+<h3 class="font-h3 text-sm text-cyan-400 uppercase tracking-widest">NASA 动态</h3>
+</div>
+<span class="material-symbols-outlined text-cyan-900 text-xs" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<div class="flex-1 bg-surface-container-low rounded border border-outline-variant/30 flex items-center justify-center bg-cover bg-center" data-alt="A high-contrast, cyberpunk-style photograph of a deep space nebula glowing with intense cyan and magenta light against a pitch-black starry background, resembling a high-tech terminal feed." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDGMGdob8L536d-aWxrj4Z9CNubg6xLyrCTD8q1jioaGHG4ewecFpMeWqWRpnwOF_o1T0wRKLloS_DsBtg94ymNIt3lrEFz4xa54tpyGkhNSOB194xr9JRE6aHZ5PX1yuyax-GvEkv86enVdr1UQ6aG3tdqEMOLVvkgo6YkDLa2q2UrV-r5mim9ELbDUz3WSWBpRw50Qo_bj74OZyGsuPGSDC8ypaAliwyKvFpU8iFqYt6nCaXHrlRiHKvX7wfGu5TVVCg1jrsmEnw');">
+<div class="bg-background/80 px-sm py-xs rounded text-xs font-caption text-primary">猎户座星云扫描结果</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Quake & Orbit Tracking -->
+<div class="col-start-10 col-span-3 row-span-5 flex flex-col gap-md z-10">
+<!-- Earthquake Monitor -->
+<div class="glass-panel flex-1 rounded-lg p-md flex flex-col relative overflow-hidden group">
+<div class="scan-line hidden group-hover:block"></div>
+<div class="flex items-center justify-between mb-sm border-b border-secondary/30 pb-xs">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="seismograph">network_check</span>
+<h3 class="font-h3 text-sm text-secondary uppercase tracking-widest glow-magenta-text">地震监测网络</h3>
+</div>
+<span class="material-symbols-outlined text-cyan-900 text-xs" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<div class="flex-1 flex flex-col gap-sm mt-sm">
+<div class="flex justify-between items-center bg-surface-container/50 p-sm rounded border border-outline-variant/20">
+<span class="font-caption text-xs text-on-surface">环太平洋带</span>
+<span class="font-data-display text-sm text-warning">4.2 M</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container/50 p-sm rounded border border-outline-variant/20">
+<span class="font-caption text-xs text-on-surface">中洋脊</span>
+<span class="font-data-display text-sm text-error">5.8 M</span>
+</div>
+</div>
+</div>
+<!-- Orbit Tracking -->
+<div class="glass-panel h-[250px] rounded-lg p-md flex flex-col relative overflow-hidden group">
+<div class="scan-line hidden group-hover:block"></div>
+<div class="flex items-center justify-between mb-sm border-b border-cyan-500/20 pb-xs">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-cyan-400 text-sm" data-icon="radar">radar</span>
+<h3 class="font-h3 text-sm text-cyan-400 uppercase tracking-widest">轨道追踪</h3>
+</div>
+<span class="material-symbols-outlined text-cyan-900 text-xs" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<div class="flex-1 relative flex items-center justify-center">
+<!-- Simple Radar UI -->
+<div class="w-32 h-32 rounded-full border border-cyan-500/30 flex items-center justify-center relative">
+<div class="w-16 h-16 rounded-full border border-cyan-500/20"></div>
+<div class="absolute top-1/2 left-1/2 w-full h-[1px] bg-cyan-500/30 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute top-1/2 left-1/2 h-full w-[1px] bg-cyan-500/30 -translate-x-1/2 -translate-y-1/2"></div>
+<!-- Blips -->
+<div class="absolute w-2 h-2 rounded-full bg-secondary top-4 right-8 shadow-[0_0_8px_rgba(255,0,144,0.8)]"></div>
+<div class="absolute w-2 h-2 rounded-full bg-primary-container bottom-6 left-6 shadow-[0_0_8px_rgba(0,229,255,0.8)]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Row: 4 Mini Panels -->
+<div class="col-span-12 row-start-6 grid grid-cols-4 gap-md z-10 h-full pb-md">
+<!-- Weather -->
+<div class="glass-panel rounded-lg p-sm flex items-center justify-between hover:border-cyan-400 transition-colors">
+<div class="flex flex-col">
+<span class="font-h3 text-xs text-cyan-400 mb-xs">实时天气</span>
+<span class="font-data-display text-lg text-on-surface">24°C</span>
+</div>
+<span class="material-symbols-outlined text-cyan-400 text-2xl drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]" data-icon="partly_cloudy_day">partly_cloudy_day</span>
+</div>
+<!-- Fire -->
+<div class="glass-panel rounded-lg p-sm flex items-center justify-between hover:border-secondary transition-colors">
+<div class="flex flex-col">
+<span class="font-h3 text-xs text-secondary mb-xs">火灾热点</span>
+<span class="font-data-display text-lg text-on-surface">12 <span class="text-xs text-outline-variant">活跃</span></span>
+</div>
+<span class="material-symbols-outlined text-secondary text-2xl drop-shadow-[0_0_5px_rgba(255,0,144,0.5)]" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<!-- Rain -->
+<div class="glass-panel rounded-lg p-sm flex items-center justify-between hover:border-info transition-colors">
+<div class="flex flex-col">
+<span class="font-h3 text-xs text-info mb-xs">降雨量</span>
+<span class="font-data-display text-lg text-on-surface">45mm</span>
+</div>
+<span class="material-symbols-outlined text-info text-2xl drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]" data-icon="rainy">rainy</span>
+</div>
+<!-- News -->
+<div class="glass-panel rounded-lg p-sm flex items-center justify-between hover:border-cyan-400 transition-colors">
+<div class="flex flex-col">
+<span class="font-h3 text-xs text-cyan-400 mb-xs">星际资讯</span>
+<span class="font-caption text-[10px] text-on-surface-variant line-clamp-2">新一代深空探测器进入猎户座轨道边缘进行数据收集。</span>
+</div>
+<span class="material-symbols-outlined text-cyan-400 text-xl ml-xs" data-icon="article">article</span>
+</div>
+</div>
+</main>
+</body></html>

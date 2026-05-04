@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>全球卫星追踪网络 - NovaStar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#3e001f",
+                        "secondary-fixed": "#ffd9e3",
+                        "secondary": "#ffb0ca",
+                        "glow-cyan": "rgba(0, 229, 255, 0.5)",
+                        "on-primary": "#00363d",
+                        "inverse-primary": "#006875",
+                        "surface-container": "#1d2022",
+                        "secondary-container": "#ff479a",
+                        "on-secondary-container": "#58002e",
+                        "on-surface-variant": "#bac9cc",
+                        "on-tertiary-fixed": "#23005c",
+                        "warning": "#F59E0B",
+                        "surface-dim": "#111415",
+                        "primary": "#c3f5ff",
+                        "on-tertiary-container": "#6834d1",
+                        "glow-magenta": "rgba(255, 0, 144, 0.5)",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "inverse-surface": "#e1e2e4",
+                        "tertiary-container": "#d9c8ff",
+                        "outline-variant": "#3b494c",
+                        "surface-container-high": "#282a2c",
+                        "secondary-fixed-dim": "#ffb0ca",
+                        "primary-fixed": "#9cf0ff",
+                        "surface-variant": "#323537",
+                        "on-secondary-fixed-variant": "#8d004d",
+                        "on-error": "#690005",
+                        "on-background": "#e1e2e4",
+                        "on-tertiary": "#3c0091",
+                        "surface-glass": "hsla(222, 47%, 8%, 0.8)",
+                        "error": "#EF4444",
+                        "info": "#3B82F6",
+                        "on-secondary": "#640035",
+                        "surface-tint": "#00daf3",
+                        "on-primary-fixed": "#001f24",
+                        "surface": "#111415",
+                        "surface-bright": "#37393b",
+                        "on-primary-fixed-variant": "#004f58",
+                        "tertiary-fixed": "#e9ddff",
+                        "surface-container-low": "#191c1e",
+                        "surface-container-highest": "#323537",
+                        "tertiary": "#f2e9ff",
+                        "background-alt": "#111827",
+                        "primary-container": "#00e5ff",
+                        "background": "#0A0E1A",
+                        "on-surface": "#e1e2e4",
+                        "on-primary-container": "#00626e",
+                        "surface-container-lowest": "#0c0f10",
+                        "success": "#22C55E",
+                        "primary-fixed-dim": "#00daf3",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "error-container": "#93000a",
+                        "outline": "#849396",
+                        "inverse-on-surface": "#2e3132",
+                        "background-hover": "#1F2937",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "xl": "40px",
+                        "page-margin": "48px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "data-display": ["Inter"],
+                        "h3": ["Space Grotesk"],
+                        "h2": ["Space Grotesk"],
+                        "caption": ["Inter"],
+                        "body": ["Inter"],
+                        "h1": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "data-display": ["24px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "h3": ["1.75rem", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "h2": ["2.25rem", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "body": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h1": ["3rem", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glow-border {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+        .glow-magenta-border {
+            box-shadow: 0 0 20px rgba(255, 0, 144, 0.2);
+        }
+        .scan-line-active {
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-line-active::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body overflow-x-hidden antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-slate-950/60 backdrop-blur-lg border-b border-cyan-500/30 shadow-[0_0_20px_rgba(0,229,255,0.15)]">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-bold text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.7)] font-['Space_Grotesk'] uppercase tracking-widest scale-105 duration-300 ease-out">NovaStar</span>
+</div>
+<div class="flex items-center gap-4 text-cyan-400 font-['Space_Grotesk'] uppercase tracking-widest">
+<!-- Navigation items for TopAppBar (Hidden on mobile, flex on md) -->
+<nav class="hidden md:flex gap-6 mr-8">
+<a class="text-cyan-400 border-b-2 border-cyan-400 py-1 font-bold" href="#">追踪</a>
+<a class="text-slate-500 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all py-1" href="#">降雨</a>
+<a class="text-slate-500 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all py-1" href="#">天气</a>
+<a class="text-slate-500 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all py-1" href="#">探索</a>
+<a class="text-slate-500 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all py-1" href="#">新闻</a>
+<a class="text-slate-500 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all py-1" href="#">统计</a>
+</nav>
+<button aria-label="Notifications" class="hover:text-cyan-300 hover:bg-cyan-500/10 transition-all p-2 rounded-full scale-105 duration-300 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications</span>
+</button>
+<button aria-label="Settings" class="hover:text-cyan-300 hover:bg-cyan-500/10 transition-all p-2 rounded-full scale-105 duration-300 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+</button>
+<img alt="指挥官头像" class="w-8 h-8 rounded-full border border-cyan-500/50" data-alt="A highly detailed portrait of a sci-fi commander with subtle glowing cybernetic enhancements, set against a dark cyberpunk backdrop. The lighting is dramatic, emphasizing sharp facial features with cyan and magenta neon accents. The mood is authoritative and futuristic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn0oGiK9l1fEZyP-1bXx8m-Vu90D9K2ug-ZskDR-n8Z6MDwWzO9bDcpqxcKXpqxfRVL4iEYBJ4Hu4ymJSamrdzDpaF_dDUOv4IDuOQ2MBu-A5QXfZxTLy2Kdj_bU982mIJ1w8q0d1uvO25L6_FK3_vysfZc7x2U2IM4Ip0blXYCwJvzlcv6R1oJHQSm6JYDZBm5QOsQhVF6p8mi_VCAR_Uu1VRza5hup-x0MzWjCj_dlhKMkt386w9SoOHyDuEj3u7nIZmPa0FHsw"/>
+</div>
+</header>
+<!-- SideNavBar (Hidden on small screens) -->
+<aside class="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] z-40 flex flex-col pt-4 bg-slate-950/80 backdrop-blur-2xl border-r border-cyan-500/30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] divide-y divide-cyan-500/10 hidden md:flex transition-all duration-200 ease-in-out">
+<div class="px-6 pb-6 flex items-center gap-3">
+<img alt="NovaStar指挥中心" class="w-10 h-10 rounded-full border border-cyan-400" data-alt="A stylized glowing holographic logo of a star base or command center, rendered in brilliant cyan and deep space black. The logo features intricate geometric patterns and looks highly technological. The mood is mysterious and advanced." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzq53zb7K_TV6xwn0Gm1veOVgO6KG-1fimdb_Jdg5Hvwk2UhJ9iICSHSAkJEO9TO88ux5cdcHQ9a1lXCl-7Fso0etm_OClACMwpq4mYu11UHmXphfpO5m5todacacIIxlSz_ORsVnI7VflP3fAT9KycUI5oTfay8uZ_4zTiPM7R49UAnid_af4Uu7pI_UmN4wATT6UEOvSYAL-0mjMVvjR1KcgfMwMRbAmC07UnnkBnJ7u83iSOlGqI64huljQyCkysGxhNZpz6_k"/>
+<div>
+<h2 class="text-cyan-400 font-bold font-['Space_Grotesk'] text-sm font-medium">新星指挥部</h2>
+<p class="text-slate-400 text-xs mt-1">系统在线</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-2">
+<a class="flex items-center gap-3 px-3 py-2 bg-cyan-500/20 text-cyan-300 border-r-4 border-cyan-400 shadow-[0_0_15px_rgba(0,229,255,0.3)] rounded-l-md font-['Space_Grotesk'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">radar</span>
+                追踪
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 opacity-70 hover:bg-magenta-500/10 hover:text-cyan-200 rounded-md font-['Space_Grotesk'] text-sm font-medium transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">water_drop</span>
+                降雨
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 opacity-70 hover:bg-magenta-500/10 hover:text-cyan-200 rounded-md font-['Space_Grotesk'] text-sm font-medium transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">cloudy_snowing</span>
+                天气
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 opacity-70 hover:bg-magenta-500/10 hover:text-cyan-200 rounded-md font-['Space_Grotesk'] text-sm font-medium transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">explore</span>
+                探索
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 opacity-70 hover:bg-magenta-500/10 hover:text-cyan-200 rounded-md font-['Space_Grotesk'] text-sm font-medium transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">newspaper</span>
+                新闻
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 opacity-70 hover:bg-magenta-500/10 hover:text-cyan-200 rounded-md font-['Space_Grotesk'] text-sm font-medium transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+                统计
+            </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-16 min-h-screen flex flex-col p-lg gap-lg">
+<!-- Header -->
+<div class="flex justify-between items-end mb-4 border-b border-outline-variant pb-2">
+<div>
+<h1 class="font-h1 text-h1 text-primary drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">全球卫星追踪网络</h1>
+<p class="font-caption text-caption text-on-surface-variant mt-2 tracking-widest uppercase">实时轨道监控系统</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-glass border border-outline-variant rounded px-4 py-2 flex items-center gap-2 glow-border">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,229,255,1)]"></div>
+<span class="font-caption text-caption text-primary">网络连接稳定</span>
+</div>
+</div>
+</div>
+<!-- Upper Section: 3D Visualization Placeholder -->
+<section class="h-[614px] relative bg-surface-container rounded-xl border border-outline-variant overflow-hidden glow-border scan-line-active">
+<!-- Background Image mimicking deep space/earth -->
+<div class="absolute inset-0 z-0 bg-cover bg-center opacity-40 mix-blend-screen" data-alt="A vast, deep space background with a dark, stylized Earth globe prominently featured. The Earth has a futuristic holographic grid of cyan latitude and longitude lines. Multiple glowing orbital paths wrap around the planet: cyan for low orbit, purple for medium orbit, and magenta for geosynchronous orbit. Brilliant tiny light points represent satellites, with one distinct yellow star-shaped marker for the ISS. The scene is cinematic, dark, and highly technological." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCHmKnqeFZzqKDdEC0O0Fwh6bCuO8qvMC5vgfhV7WQBCLSpIxWv3zLVvFd0odh6H6YImIb2vZe9LjEv69-79hZI-bzvRaNIRlorIzyLzF4nzudY2nTxe3B2EmM8fl2ktlpix_I7N6hWghz8HPkOPodqpalP8loUiQ78XysCm1z7sniAV13sxRB4B3f7jf27e-eG0Salv7jltMeb6nOhqm3VENrx0vmpPHxVt4g3j5dvbiSNBJOkLZJLjhNPNe4tZdtCBiSbHk-skX4');"></div>
+<!-- Overlay Interface Elements -->
+<div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
+<div class="bg-surface-container-high/80 backdrop-blur border border-primary/30 rounded p-2 flex items-center gap-2">
+<span class="w-3 h-1 bg-primary"></span>
+<span class="font-caption text-caption text-primary">LEO (低轨道)</span>
+</div>
+<div class="bg-surface-container-high/80 backdrop-blur border border-tertiary-container/30 rounded p-2 flex items-center gap-2">
+<span class="w-3 h-1 bg-[#b026ff]"></span>
+<span class="font-caption text-caption text-tertiary-container">MEO (中轨道)</span>
+</div>
+<div class="bg-surface-container-high/80 backdrop-blur border border-secondary-container/30 rounded p-2 flex items-center gap-2">
+<span class="w-3 h-1 bg-secondary-container"></span>
+<span class="font-caption text-caption text-secondary-container">GEO (同步轨道)</span>
+</div>
+<div class="bg-surface-container-high/80 backdrop-blur border border-warning/30 rounded p-2 flex items-center gap-2 mt-2">
+<span class="material-symbols-outlined text-warning text-sm">star</span>
+<span class="font-caption text-caption text-warning">ISS</span>
+</div>
+</div>
+<!-- Visualization Center Marker -->
+<div class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+<div class="w-96 h-96 rounded-full border border-primary/20 border-dashed animate-[spin_60s_linear_infinite]"></div>
+<div class="absolute w-64 h-64 rounded-full border border-secondary-container/20 border-dashed animate-[spin_40s_linear_infinite_reverse]"></div>
+</div>
+<div class="absolute bottom-4 right-4 z-10 bg-surface-container-high/90 backdrop-blur p-4 rounded border border-outline-variant">
+<div class="font-data-display text-data-display text-primary tracking-wider">24,591</div>
+<div class="font-caption text-caption text-on-surface-variant">总监控目标数量</div>
+</div>
+</section>
+<!-- Lower Section: Split Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg flex-1 pb-12">
+<!-- Left Column: Active Satellites List -->
+<section class="lg:col-span-7 bg-surface-container rounded-xl border border-outline-variant p-6 scan-line-active flex flex-col hover:border-primary/50 transition-colors duration-300">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-h3 text-h3 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">list_alt</span>
+                        活跃卫星列表 (Top 10)
+                    </h2>
+<button class="bg-surface-variant border border-primary/30 text-primary px-3 py-1 rounded hover:bg-primary/10 transition-colors font-caption text-caption">完整列表</button>
+</div>
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/50">
+<th class="py-3 font-caption text-caption text-on-surface-variant uppercase tracking-wider font-medium">标识</th>
+<th class="py-3 font-caption text-caption text-on-surface-variant uppercase tracking-wider font-medium">轨道</th>
+<th class="py-3 font-caption text-caption text-on-surface-variant uppercase tracking-wider font-medium text-right">高度 (km)</th>
+<th class="py-3 font-caption text-caption text-on-surface-variant uppercase tracking-wider font-medium text-right">速度 (km/s)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 font-data-display text-[14px]">
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 text-primary font-bold group-hover:text-primary-fixed">ISS (ZARYA)</td>
+<td class="py-3"><span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] border border-primary/30">LEO</span></td>
+<td class="py-3 text-right text-on-surface-variant">418.5</td>
+<td class="py-3 text-right text-secondary-fixed">7.66</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 text-on-surface group-hover:text-primary-fixed">STARLINK-30112</td>
+<td class="py-3"><span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] border border-primary/30">LEO</span></td>
+<td class="py-3 text-right text-on-surface-variant">542.1</td>
+<td class="py-3 text-right text-secondary-fixed">7.58</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 text-on-surface group-hover:text-primary-fixed">GPS BIIF-10</td>
+<td class="py-3"><span class="px-2 py-1 rounded bg-tertiary-container/10 text-tertiary-container text-[10px] border border-tertiary-container/30">MEO</span></td>
+<td class="py-3 text-right text-on-surface-variant">20,180.0</td>
+<td class="py-3 text-right text-secondary-fixed">3.87</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 text-on-surface group-hover:text-primary-fixed">METEOSAT-11</td>
+<td class="py-3"><span class="px-2 py-1 rounded bg-secondary-container/10 text-secondary-container text-[10px] border border-secondary-container/30">GEO</span></td>
+<td class="py-3 text-right text-on-surface-variant">35,786.0</td>
+<td class="py-3 text-right text-secondary-fixed">3.07</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 text-on-surface group-hover:text-primary-fixed">HUBBLE</td>
+<td class="py-3"><span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] border border-primary/30">LEO</span></td>
+<td class="py-3 text-right text-on-surface-variant">535.0</td>
+<td class="py-3 text-right text-secondary-fixed">7.59</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Right Column: Orbit Statistics -->
+<section class="lg:col-span-5 bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col gap-6 hover:border-secondary-container/50 transition-colors duration-300">
+<h2 class="font-h3 text-h3 text-on-surface flex items-center gap-2 border-b border-outline-variant/50 pb-4">
+<span class="material-symbols-outlined text-secondary-container">pie_chart</span>
+                    轨道统计
+                </h2>
+<!-- Stat Cards -->
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-surface-container-high rounded p-4 border border-primary/20 flex flex-col items-center justify-center glow-border">
+<span class="font-caption text-caption text-primary mb-1">LEO</span>
+<span class="font-data-display text-[20px] text-on-surface font-bold tracking-widest">18,402</span>
+</div>
+<div class="bg-surface-container-high rounded p-4 border border-tertiary-container/20 flex flex-col items-center justify-center">
+<span class="font-caption text-caption text-tertiary-container mb-1">MEO</span>
+<span class="font-data-display text-[20px] text-on-surface font-bold tracking-widest">1,834</span>
+</div>
+<div class="bg-surface-container-high rounded p-4 border border-secondary-container/20 flex flex-col items-center justify-center glow-magenta-border">
+<span class="font-caption text-caption text-secondary-container mb-1">GEO</span>
+<span class="font-data-display text-[20px] text-on-surface font-bold tracking-widest">4,355</span>
+</div>
+</div>
+<!-- Chart Placeholder -->
+<div class="flex-1 min-h-[200px] bg-surface-dim rounded border border-outline-variant/50 flex flex-col items-center justify-center relative p-4">
+<!-- Simple CSS Pie Chart representation -->
+<div class="w-40 h-40 rounded-full bg-[conic-gradient(#00e5ff_0deg_260deg,#d9c8ff_260deg_290deg,#ff479a_290deg_360deg)] flex items-center justify-center relative shadow-[0_0_30px_rgba(0,229,255,0.2)]">
+<div class="w-24 h-24 rounded-full bg-surface-dim flex flex-col items-center justify-center absolute z-10 border border-outline-variant">
+<span class="font-data-display text-lg text-primary">75%</span>
+<span class="font-caption text-caption text-on-surface-variant">LEO 占比</span>
+</div>
+</div>
+<div class="w-full mt-6 flex justify-between px-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-primary rounded"></div>
+<span class="font-caption text-xs text-on-surface-variant">低轨道</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-tertiary-container rounded"></div>
+<span class="font-caption text-xs text-on-surface-variant">中轨道</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-secondary-container rounded"></div>
+<span class="font-caption text-xs text-on-surface-variant">同步轨道</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

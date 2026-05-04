@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NovaStar 地球指挥中心</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#111415",
+                        "on-primary": "#00363d",
+                        "surface-container-highest": "#323537",
+                        "success": "#22C55E",
+                        "on-tertiary-fixed": "#23005c",
+                        "on-surface-variant": "#bac9cc",
+                        "surface": "#111415",
+                        "outline-variant": "#3b494c",
+                        "outline": "#849396",
+                        "background": "#0A0E1A",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#e9ddff",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "on-tertiary": "#3c0091",
+                        "on-primary-fixed-variant": "#004f58",
+                        "on-background": "#e1e2e4",
+                        "primary-fixed-dim": "#00daf3",
+                        "inverse-primary": "#006875",
+                        "on-secondary-fixed": "#3e001f",
+                        "background-hover": "#1F2937",
+                        "on-primary-fixed": "#001f24",
+                        "tertiary": "#f2e9ff",
+                        "primary-fixed": "#9cf0ff",
+                        "tertiary-container": "#d9c8ff",
+                        "background-alt": "#111827",
+                        "on-tertiary-container": "#6834d1",
+                        "on-secondary-container": "#58002e",
+                        "error-container": "#93000a",
+                        "surface-tint": "#00daf3",
+                        "surface-container-high": "#282a2c",
+                        "inverse-on-surface": "#2e3132",
+                        "warning": "#F59E0B",
+                        "surface-container-lowest": "#0c0f10",
+                        "secondary": "#ffb0ca",
+                        "error": "#EF4444",
+                        "inverse-surface": "#e1e2e4",
+                        "secondary-container": "#ff479a",
+                        "surface-variant": "#323537",
+                        "glow-cyan": "rgba(0, 229, 255, 0.5)",
+                        "secondary-fixed-dim": "#ffb0ca",
+                        "primary-container": "#00e5ff",
+                        "on-secondary-fixed-variant": "#8d004d",
+                        "on-error-container": "#ffdad6",
+                        "info": "#3B82F6",
+                        "surface-container": "#1d2022",
+                        "primary": "#c3f5ff",
+                        "surface-container-low": "#191c1e",
+                        "on-surface": "#e1e2e4",
+                        "on-primary-container": "#00626e",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "glow-magenta": "rgba(255, 0, 144, 0.5)",
+                        "surface-bright": "#37393b",
+                        "on-secondary": "#640035",
+                        "surface-glass": "hsla(222, 47%, 8%, 0.8)",
+                        "secondary-fixed": "#ffd9e3",
+                        
+                        // Enforced Colors mapping
+                        "nova-bg": "#0A0E1A",
+                        "nova-primary": "#00E5FF",
+                        "nova-accent": "#FF0090",
+                        "nova-aux": "#8B5CF6",
+                        "nova-panel": "rgba(17, 24, 39, 0.85)",
+                        "nova-border": "rgba(0, 229, 255, 0.15)",
+                        "nova-text": "#F3F4F6",
+                    },
+                    fontFamily: {
+                        "orbitron": ["Orbitron", "sans-serif"],
+                        "jetbrains": ["JetBrains Mono", "monospace"],
+                        "data-display": ["JetBrains Mono"],
+                        "h3": ["Orbitron"],
+                        "h1": ["Orbitron"],
+                        "body": ["JetBrains Mono"],
+                        "caption": ["JetBrains Mono"],
+                        "h2": ["Orbitron"]
+                    },
+                    fontSize: {
+                        "data-display": ["24px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "h3": ["1.75rem", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "h1": ["3rem", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "h2": ["2.25rem", { "lineHeight": "1.3", "fontWeight": "600" }]
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, rgba(0, 229, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 229, 255, 0.05) 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0E1A;
+            color: #F3F4F6;
+            overflow: hidden; /* Dashboard lock */
+        }
+        .bg-grid {
+            background-image: linear-gradient(to right, rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .panel-glass {
+            background-color: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05), 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+        .glow-border-cyan {
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+        .glow-text-cyan {
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+        }
+        .glow-text-magenta {
+            text-shadow: 0 0 10px rgba(255, 0, 144, 0.8);
+        }
+        .earth-bloom {
+            box-shadow: 0 0 100px 20px rgba(0, 229, 255, 0.3), inset 0 0 50px rgba(0, 229, 255, 0.5);
+        }
+        
+        /* Font Utilities */
+        .font-title { font-family: 'Orbitron', sans-serif; }
+        .font-mono-data { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Custom Scrollbar for Terminals */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(17, 24, 39, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 229, 255, 0.3);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen relative bg-grid">
+<!-- Top Navigation Panel (From JSON logic, adapted for this specific dashboard view) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 py-4 bg-slate-950/40 backdrop-blur-xl border-b border-cyan-500/30 shadow-[0_0_25px_rgba(0,229,255,0.15)]">
+<div class="flex items-center gap-6">
+<h1 class="text-2xl font-black text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.8)] font-title uppercase tracking-widest">NovaStar 地球指挥中心</h1>
+<nav class="hidden md:flex gap-6 ml-8">
+<a class="font-['Space_Grotesk'] tracking-widest uppercase text-cyan-400 border-b-2 border-cyan-400 pb-1 drop-shadow-[0_0_8px_rgba(0,229,255,0.6)]" href="#">核心指挥</a>
+<a class="font-['Space_Grotesk'] tracking-widest uppercase text-slate-400 hover:text-cyan-200 transition-colors" href="#">卫星协议</a>
+<a class="font-['Space_Grotesk'] tracking-widest uppercase text-slate-400 hover:text-cyan-200 transition-colors" href="#">地球影像</a>
+<a class="font-['Space_Grotesk'] tracking-widest uppercase text-slate-400 hover:text-cyan-200 transition-colors" href="#">系统日志</a>
+</nav>
+</div>
+<div class="flex items-center gap-4 text-cyan-400">
+<span class="material-symbols-outlined hover:bg-cyan-500/10 hover:text-cyan-300 transition-all p-2 rounded-full cursor-pointer">settings_input_antenna</span>
+<span class="material-symbols-outlined hover:bg-cyan-500/10 hover:text-cyan-300 transition-all p-2 rounded-full cursor-pointer">monitor_heart</span>
+<span class="material-symbols-outlined hover:bg-cyan-500/10 hover:text-cyan-300 transition-all p-2 rounded-full cursor-pointer">notifications_active</span>
+<!-- Circular System Status / Clock -->
+<div class="ml-4 flex items-center justify-center w-16 h-16 rounded-full border-2 border-cyan-500/50 glow-border-cyan relative">
+<span class="font-mono-data text-sm font-bold text-cyan-400 glow-text-cyan">14:02</span>
+<div class="absolute w-2 h-2 bg-green-500 rounded-full top-1 right-1 shadow-[0_0_8px_#22C55E]"></div>
+</div>
+</div>
+</header>
+<!-- Side Navigation Bar (From JSON) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col items-center py-20 bg-slate-950/60 backdrop-blur-2xl border-r border-cyan-500/30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] w-20 transition-all duration-500 ease-out">
+<div class="flex flex-col gap-8 mt-12 w-full">
+<button class="w-full py-4 flex justify-center bg-cyan-500/20 text-cyan-400 border-r-4 border-cyan-400 shadow-[inset_0_0_15px_rgba(0,229,255,0.3)]" title="实时数据">
+<span class="material-symbols-outlined">analytics</span>
+</button>
+<button class="w-full py-4 flex justify-center text-slate-500 hover:text-cyan-300 hover:bg-slate-800/50 hover:shadow-[0_0_10px_rgba(0,229,255,0.2)] transition-all" title="轨道追踪">
+<span class="material-symbols-outlined">satellite_alt</span>
+</button>
+<button class="w-full py-4 flex justify-center text-slate-500 hover:text-cyan-300 hover:bg-slate-800/50 hover:shadow-[0_0_10px_rgba(0,229,255,0.2)] transition-all" title="洋红监测">
+<span class="material-symbols-outlined">sensors</span>
+</button>
+<button class="w-full py-4 flex justify-center text-slate-500 hover:text-cyan-300 hover:bg-slate-800/50 hover:shadow-[0_0_10px_rgba(0,229,255,0.2)] transition-all" title="全息投影">
+<span class="material-symbols-outlined">view_in_ar</span>
+</button>
+<button class="w-full py-4 flex justify-center text-slate-500 hover:text-cyan-300 hover:bg-slate-800/50 hover:shadow-[0_0_10px_rgba(0,229,255,0.2)] transition-all" title="安全终端">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+</div>
+<div class="mt-auto flex flex-col items-center gap-2 mb-8 w-full px-2">
+<img alt="Commander Avatar" class="w-10 h-10 rounded-full border border-cyan-400/50" data-alt="A futuristic commander portrait avatar with glowing cyan UI overlays, high contrast, cyberpunk style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuegSjZ4zw79pIuFXeJ_WtY2l5qHvlbPqh7jT7qUPtDqL11ppJ4_zNlZxJxY-SqR3EfhaCtZ5LaDf_IDu1J0N9yKNXb3-bWj6zETNDkwX1zsOaLtute4XWbpRjZP6DqUQZcuehnLsLv0YcR5UEtrWy4cKud4tXEdBfFxktIJBXdNFiGAraZRVp1beayEeqRK9LfdGHtFYqXuK3wZV7Kf60Sk0bLE3Rlaqq7TFwpPGMzizBlw_DB7yY0TydONMR5dLNmkbDEST8HLE"/>
+<span class="font-title text-[10px] text-cyan-400">指挥官</span>
+<button class="mt-4 w-full py-2 bg-red-600/20 text-red-400 border border-red-500/50 rounded hover:bg-red-600/40 text-[10px] font-title transition-colors shadow-[0_0_10px_rgba(239,68,68,0.3)]">紧急呼叫</button>
+</div>
+</aside>
+<!-- Main Canvas Area -->
+<main class="absolute inset-0 pt-24 pb-12 pl-24 pr-8 overflow-hidden flex">
+<!-- Left Panel Column (Density: High) -->
+<div class="w-1/4 h-full flex flex-col gap-6 z-20">
+<!-- Panel 1: 实时数据流 -->
+<div class="panel-glass rounded-lg flex flex-col flex-1 min-h-0 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent opacity-50"></div>
+<div class="p-3 border-b border-nova-border flex justify-between items-center">
+<h2 class="font-title text-sm text-nova-primary tracking-widest glow-text-cyan flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">terminal</span>
+                        实时数据流
+                    </h2>
+<div class="w-2 h-2 rounded-full bg-nova-primary animate-pulse"></div>
+</div>
+<div class="p-4 flex-1 overflow-y-auto font-mono-data text-xs text-nova-primary/70 leading-relaxed space-y-1">
+<p><span class="text-nova-accent">[SYS]</span> 核心节点 0x7F 连接建立</p>
+<p><span class="text-nova-aux">[NET]</span> 卫星轨道偏差修正: +0.002°</p>
+<p><span class="text-nova-primary">[DAT]</span> 接收洋红监测网格数据包</p>
+<p><span class="text-nova-accent">[WRN]</span> 区域 D-4 异常热源探测</p>
+<p><span class="text-nova-aux">[NET]</span> NASA TDRS 握手成功</p>
+<p><span class="text-nova-primary">[DAT]</span> 解析气象点阵列... 100%</p>
+<p><span class="text-nova-accent">[SYS]</span> 核心节点 0x8A 连接建立</p>
+<p><span class="text-nova-aux">[NET]</span> 卫星轨道偏差修正: -0.001°</p>
+</div>
+</div>
+<!-- Panel 2: NASA 太空动态 -->
+<div class="panel-glass rounded-lg flex flex-col h-[30%] relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent opacity-50"></div>
+<div class="p-3 border-b border-nova-border flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-nova-primary">rocket_launch</span>
+<h2 class="font-title text-sm text-nova-text tracking-widest">NASA 太空动态</h2>
+</div>
+<div class="p-3 flex gap-4 h-full">
+<div class="w-1/3 h-full rounded border border-nova-border overflow-hidden relative group-hover:border-nova-primary/50 transition-colors">
+<img alt="APOD Thumbnail" class="w-full h-full object-cover" data-alt="A breathtaking view of a vibrant nebula in deep space, featuring intense purple and cyan gas clouds illuminated by distant stars, high contrast cosmic photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJLIXWmYX3-RjuwVgDryFwDTzLqNgJPKsze2Jb0gsuqNN4rYCHPoSHS9i929rXszSwSH_EBtcLHXuqPynlpWCmB695XRwkXB9ZIZhlrcWxlHGKexkJDMAZfXxYDss7v-Oj8i4UcJTO82mx5MK_DCehW1CUKBXOtcCeO5MRV_qVaP6aBCOYN3Jf1ttVFKynB9kdQ7eGUK-aQ6wIx7wVrgrC8BSjC2zbSoSRXvipMh9JZTcr3fxQy9W48NfZT8jBgqFzMtRW9NKSklU"/>
+</div>
+<div class="flex-1 flex flex-col justify-center gap-2">
+<div class="font-mono-data text-xs flex justify-between border-b border-nova-border/50 pb-1">
+<span class="text-nova-text/80">太阳耀斑</span>
+<span class="text-nova-accent">M2.3</span>
+</div>
+<div class="font-mono-data text-xs flex justify-between border-b border-nova-border/50 pb-1">
+<span class="text-nova-text/80">近地天体</span>
+<span class="text-nova-primary">0 警告</span>
+</div>
+<div class="font-mono-data text-xs flex justify-between">
+<span class="text-nova-text/80">ISS 轨道</span>
+<span class="text-nova-aux">标称</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Panel 3: 实时天气 -->
+<div class="panel-glass rounded-lg flex flex-col h-[25%] relative group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent opacity-50"></div>
+<div class="p-3 border-b border-nova-border flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-nova-primary">thermostat</span>
+<h2 class="font-title text-sm text-nova-text tracking-widest">实时天气</h2>
+</div>
+<div class="flex-1 flex items-center justify-between p-4">
+<div>
+<div class="font-mono-data text-xs text-nova-text/60 mb-1">当前位置: 北京指挥所</div>
+<div class="font-title text-4xl font-bold text-nova-primary glow-text-cyan">28°C</div>
+</div>
+<div class="flex flex-col gap-2 font-mono-data text-xs text-right">
+<div><span class="text-nova-text/60">湿度:</span> <span class="text-nova-primary">45%</span></div>
+<div><span class="text-nova-text/60">风速:</span> <span class="text-nova-primary">12 km/h</span></div>
+<div><span class="text-nova-text/60">气压:</span> <span class="text-nova-primary">1012 hPa</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Center/Right 3D Earth Area -->
+<div class="flex-1 relative h-full flex items-center justify-center -mr-12 z-10">
+<!-- The 3D Earth Representation -->
+<div class="w-[600px] h-[600px] rounded-full border border-nova-primary/30 earth-bloom relative flex items-center justify-center" style="background: radial-gradient(circle at 30% 30%, rgba(0, 229, 255, 0.1) 0%, rgba(10, 14, 26, 0.8) 70%);">
+<!-- Grid Lines (Longitude/Latitude illusion) -->
+<div class="absolute inset-0 rounded-full border border-nova-primary/20" style="transform: rotateX(70deg);"></div>
+<div class="absolute inset-0 rounded-full border border-nova-primary/20" style="transform: rotateX(70deg) rotateZ(45deg);"></div>
+<div class="absolute inset-0 rounded-full border border-nova-primary/20" style="transform: rotateX(70deg) rotateZ(90deg);"></div>
+<div class="absolute inset-0 rounded-full border border-nova-primary/20" style="transform: rotateX(70deg) rotateZ(135deg);"></div>
+<div class="absolute inset-0 rounded-full border border-nova-primary/20" style="transform: rotateY(70deg);"></div>
+<!-- Map Texture Overlay -->
+<div class="absolute inset-0 rounded-full overflow-hidden opacity-30 mix-blend-screen">
+<img alt="Earth Texture" class="w-full h-full object-cover rounded-full" data-alt="A highly detailed blue and cyan digital wireframe map of Earth, glowing nodes connecting continents, dark background, cyberpunk holographic projection aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqPwQNzYXeOUA_XXk_tUKpfZzyoJlANcUh3GUEFfJ7AfOc8OZonpie8hHNNuTUvmUppXyWplM0bMZ_n2d4oh-BpUdtjiYYbKPo1jJUyb9avvKUmGVY2xP0t6DithVxfsJC2hk_hHEsCAHilutkpmgDILRdIyv7orxLNnN-aqLkQHN_sCKDpvtFSs0O-LJDRcxyf8XtREr9Q2HHxYCxMcQjDv4UQxE1miTKPvWa8h7MZU2-G7DdfLRfgiuo4vTSM_0iI-QdScmtHXo"/>
+</div>
+<!-- Surface Points -->
+<!-- Magenta Quake -->
+<div class="absolute top-[30%] left-[60%] w-4 h-4 rounded-full border border-nova-accent shadow-[0_0_15px_#FF0090] animate-ping"></div>
+<div class="absolute top-[30%] left-[60%] w-2 h-2 rounded-full bg-nova-accent shadow-[0_0_10px_#FF0090]"></div>
+<!-- Red Fire -->
+<div class="absolute bottom-[40%] left-[30%] w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_#EF4444]"></div>
+<!-- Connection Arc -->
+<svg class="absolute inset-0 w-full h-full" viewbox="0 0 600 600">
+<path d="M 180 360 Q 300 150 360 180" fill="transparent" stroke="rgba(0, 229, 255, 0.5)" stroke-dasharray="4 4" stroke-width="1"></path>
+</svg>
+</div>
+<!-- Orbiting Data Satellites -->
+<!-- Sat 1: GitHub -->
+<div class="absolute top-[10%] left-[20%] flex flex-col items-center gap-1 group cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-nova-panel border border-nova-primary/50 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.2)] group-hover:bg-nova-primary/20 transition-all">
+<span class="material-symbols-outlined text-nova-text text-sm">code</span>
+</div>
+<span class="font-mono-data text-[10px] text-nova-primary">GitHub</span>
+</div>
+<!-- Sat 2: NASA -->
+<div class="absolute top-[15%] right-[25%] flex flex-col items-center gap-1 group cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-nova-panel border border-nova-primary/50 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.2)] group-hover:bg-nova-primary/20 transition-all">
+<span class="material-symbols-outlined text-nova-text text-sm">rocket</span>
+</div>
+<span class="font-mono-data text-[10px] text-nova-primary">NASA</span>
+</div>
+<!-- Sat 3: Quake -->
+<div class="absolute bottom-[20%] right-[15%] flex flex-col items-center gap-1 group cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-nova-panel border border-nova-accent/50 flex items-center justify-center shadow-[0_0_15px_rgba(255,0,144,0.3)] group-hover:bg-nova-accent/20 transition-all">
+<span class="material-symbols-outlined text-nova-accent text-sm">vibration</span>
+</div>
+<span class="font-mono-data text-[10px] text-nova-accent">地震</span>
+</div>
+</div>
+<!-- Right / Floating Panels overlapping Earth -->
+<div class="absolute top-24 right-8 w-72 flex flex-col gap-6 z-30">
+<!-- Panel 4: 地震监测 -->
+<div class="panel-glass rounded-lg flex flex-col relative group backdrop-blur-xl bg-slate-900/90">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#FF0090] to-transparent opacity-50"></div>
+<div class="p-3 border-b border-nova-accent/30 flex justify-between items-center">
+<h2 class="font-title text-sm text-nova-text tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-nova-accent">sensors</span>
+                        地震监测
+                    </h2>
+<span class="font-title text-xl font-bold text-nova-accent glow-text-magenta">23次</span>
+</div>
+<div class="p-3 flex flex-col gap-2 font-mono-data text-xs">
+<div class="flex justify-between items-center bg-nova-accent/10 p-2 rounded border border-nova-accent/20">
+<span class="text-nova-text/80">环太平洋带</span>
+<span class="text-nova-accent font-bold">M 6.1</span>
+</div>
+<div class="flex justify-between items-center p-2 rounded border border-transparent hover:border-nova-border/30 transition-colors">
+<span class="text-nova-text/80">地中海区域</span>
+<span class="text-warning">M 4.2</span>
+</div>
+<div class="flex justify-between items-center p-2 rounded border border-transparent hover:border-nova-border/30 transition-colors">
+<span class="text-nova-text/80">南美西岸</span>
+<span class="text-warning">M 3.8</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Row Widgets -->
+<div class="absolute bottom-12 left-24 right-8 h-40 flex gap-6 z-30">
+<!-- Panel 5: GitHub 热门 -->
+<div class="panel-glass rounded-lg flex-1 relative group flex flex-col">
+<div class="p-2 border-b border-nova-border flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-nova-primary">trending_up</span>
+<h2 class="font-title text-xs text-nova-text tracking-widest">GitHub 热门</h2>
+</div>
+<div class="p-2 flex-1 flex flex-col gap-1 justify-center font-mono-data text-xs">
+<div class="flex justify-between items-center group/item hover:bg-nova-primary/5 p-1 rounded">
+<span class="text-nova-primary">1. nova-core</span>
+<div class="w-16 h-2 bg-nova-panel border border-nova-border rounded overflow-hidden">
+<div class="h-full bg-nova-primary w-[80%]"></div>
+</div>
+</div>
+<div class="flex justify-between items-center group/item hover:bg-nova-primary/5 p-1 rounded">
+<span class="text-nova-text/80">2. earth-viz</span>
+<div class="w-16 h-2 bg-nova-panel border border-nova-border rounded overflow-hidden">
+<div class="h-full bg-nova-primary/60 w-[60%]"></div>
+</div>
+</div>
+<div class="flex justify-between items-center group/item hover:bg-nova-primary/5 p-1 rounded">
+<span class="text-nova-text/80">3. sat-tracker</span>
+<div class="w-16 h-2 bg-nova-panel border border-nova-border rounded overflow-hidden">
+<div class="h-full bg-nova-primary/40 w-[45%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Panel 6: 卫星轨道追踪 -->
+<div class="panel-glass rounded-lg flex-1 relative group flex flex-col">
+<div class="p-2 border-b border-nova-border flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-nova-aux">satellite_alt</span>
+<h2 class="font-title text-xs text-nova-text tracking-widest">卫星轨道追踪</h2>
+</div>
+<div class="p-3 flex-1 flex items-center justify-around font-mono-data text-xs">
+<div class="flex flex-col items-center">
+<span class="text-nova-text/60 mb-1">LEO</span>
+<span class="text-nova-aux font-bold text-lg">4,201</span>
+</div>
+<div class="w-[1px] h-full bg-nova-border"></div>
+<div class="flex flex-col items-center">
+<span class="text-nova-text/60 mb-1">MEO</span>
+<span class="text-nova-aux font-bold text-lg">142</span>
+</div>
+<div class="w-[1px] h-full bg-nova-border"></div>
+<div class="flex flex-col items-center">
+<span class="text-nova-text/60 mb-1">GEO</span>
+<span class="text-nova-aux font-bold text-lg">580</span>
+</div>
+</div>
+</div>
+<!-- Panel 7: 全球火灾热点 -->
+<div class="panel-glass rounded-lg flex-1 relative group flex flex-col">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#EF4444] to-transparent opacity-50"></div>
+<div class="p-2 border-b border-red-500/30 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-red-500">local_fire_department</span>
+<h2 class="font-title text-xs text-nova-text tracking-widest">全球火灾热点</h2>
+</div>
+</div>
+<div class="p-3 flex-1 flex items-center justify-center">
+<span class="font-title text-4xl font-bold text-red-500 text-shadow-[0_0_15px_#EF4444]">156处</span>
+</div>
+</div>
+<!-- Panel 8: 实时降雨 -->
+<div class="panel-glass rounded-lg flex-[1.5] relative group flex flex-col overflow-hidden">
+<div class="p-2 border-b border-nova-border flex items-center gap-2 z-10 bg-nova-panel">
+<span class="material-symbols-outlined text-sm text-info">rainy</span>
+<h2 class="font-title text-xs text-nova-text tracking-widest">实时降雨</h2>
+</div>
+<div class="flex-1 relative bg-[#061B22]">
+<img alt="Precipitation Map" class="w-full h-full object-cover opacity-60" data-alt="A stylized digital world map showing global precipitation with vibrant blue and green heatmap overlays, deep dark blue background, technical weather radar aesthetic." data-location="World Map" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOAWfC7gw9_ujHaecb0t3Dp4DJQl2gui-YVe18zv9fyUT9ahnHmWFbES9hbR5vnMAnrmAVIrAKTgMJxlFyNgo6i8aoz-FRcv-gPy6A2bwnYQiM2rNfw772LBLawbFuFn9nTwFCbB5QzqxYcjBtBV1KAI50RfaNzA9fl7rkmWQQZ5YtpcDEaUWU3PxlhrnRQENl_5s7yk5caOqkLNtqvaVQoHwXzzDEf9mTTqDFKyKLkLC7TemuCe769EIa-0GXWA4WPJmsgkgTUDY"/>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<div class="w-2 h-2 rounded bg-blue-500"></div>
+<div class="w-2 h-2 rounded bg-green-400"></div>
+<div class="w-2 h-2 rounded bg-yellow-400"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer System Status Bar (Adapted from JSON Footer) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-10 py-1 bg-slate-950/80 backdrop-blur-md border-t border-fuchsia-500/30 shadow-[0_-5px_20px_rgba(255,0,255,0.1)]">
+<div class="font-['Space_Grotesk'] text-[10px] tracking-tighter text-fuchsia-400 font-bold">
+            © 2024 NovaStar 地球指挥中心 | 实时量子加密连接
+        </div>
+<div class="flex items-center gap-6 font-mono-data text-[10px]">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_5px_#22C55E]"></span>
+<span class="text-slate-400">核心数据网</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_5px_#22C55E]"></span>
+<span class="text-slate-400">NASA API</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-warning shadow-[0_0_5px_#F59E0B]"></span>
+<span class="text-slate-400">地质监测</span>
+</div>
+</div>
+<div class="flex gap-4 font-['Space_Grotesk'] text-[10px] tracking-tighter">
+<a class="text-slate-500 hover:text-fuchsia-300 transition-colors" href="#">系统协议</a>
+<a class="text-slate-500 hover:text-fuchsia-300 transition-colors" href="#">隐私保护</a>
+<a class="text-slate-500 hover:text-fuchsia-300 transition-colors" href="#">API存取</a>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NovaStar GitHub 数据探索器</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-glass": "hsla(222, 47%, 8%, 0.8)",
+                        "secondary-fixed": "#ffd9e3",
+                        "glow-magenta": "rgba(255, 0, 144, 0.5)",
+                        "surface-bright": "#37393b",
+                        "on-secondary": "#640035",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "info": "#3B82F6",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#191c1e",
+                        "on-surface": "#e1e2e4",
+                        "on-primary-container": "#00626e",
+                        "surface-container": "#1d2022",
+                        "primary": "#c3f5ff",
+                        "secondary-container": "#ff479a",
+                        "surface-variant": "#323537",
+                        "glow-cyan": "rgba(0, 229, 255, 0.5)",
+                        "primary-container": "#00e5ff",
+                        "secondary-fixed-dim": "#ffb0ca",
+                        "on-secondary-fixed-variant": "#8d004d",
+                        "error": "#EF4444",
+                        "inverse-surface": "#e1e2e4",
+                        "warning": "#F59E0B",
+                        "secondary": "#ffb0ca",
+                        "surface-container-lowest": "#0c0f10",
+                        "tertiary": "#f2e9ff",
+                        "primary-fixed": "#9cf0ff",
+                        "on-tertiary-container": "#6834d1",
+                        "on-secondary-container": "#58002e",
+                        "tertiary-container": "#d9c8ff",
+                        "background-alt": "#111827",
+                        "surface-tint": "#00daf3",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#282a2c",
+                        "inverse-on-surface": "#2e3132",
+                        "on-primary-fixed": "#001f24",
+                        "primary-fixed-dim": "#00daf3",
+                        "inverse-primary": "#006875",
+                        "on-secondary-fixed": "#3e001f",
+                        "background-hover": "#1F2937",
+                        "on-primary-fixed-variant": "#004f58",
+                        "on-background": "#e1e2e4",
+                        "tertiary-fixed": "#e9ddff",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "on-tertiary": "#3c0091",
+                        "on-error": "#690005",
+                        "outline-variant": "#3b494c",
+                        "surface": "#111415",
+                        "background": "#0A0E1A",
+                        "outline": "#849396",
+                        "surface-container-highest": "#323537",
+                        "on-surface-variant": "#bac9cc",
+                        "success": "#22C55E",
+                        "on-tertiary-fixed": "#23005c",
+                        "surface-dim": "#111415",
+                        "on-primary": "#00363d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "40px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "page-margin": "48px",
+                        "lg": "24px",
+                        "gutter": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "data-display": ["Inter"],
+                        "h3": ["Space Grotesk"],
+                        "h1": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "h2": ["Space Grotesk"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-display": ["24px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "h3": ["1.75rem", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "h1": ["3rem", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h2": ["2.25rem", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            background-image: 
+                linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+    </style>
+</head>
+<body class="text-on-background font-body min-h-screen flex overflow-x-hidden">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-64 z-40 flex flex-col pt-20 bg-black/40 backdrop-blur-xl border-r border-cyan-900/50 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+<div class="px-6 mb-8">
+<div class="flex items-center space-x-4 mb-6">
+<img alt="NovaStar Core" class="w-12 h-12 rounded-full border border-cyan-400/50" data-alt="A futuristic, high-tech glowing blue sphere resembling an artificial intelligence core or energy source, set against a dark void background. The style is 3D rendered, cyberpunk, and highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByR7WP27w8g5M6_8koYzAtgM0Kgv4uixuk8nrm61uCQuoGRX-rCObmA_l9ZLVCd_n5KxisUkRGGMInnce-4jAp3kDRZEJKqE3MosJvIIk_liKCgUQJsEV5bvGjZwQd3zc5jIJ7FtcGYrxQqDZGd4qd0rnkJJX_TmNDVjfeJpt2e5TihyPcU-rfNrgaVzh3DXl4Me3tY--MG1fenVym-t22ugbo__B6ItRrMPmF7KK4_v9UkfC86wMw3oHBevKCWjGehRN3ChPI298"/>
+<div>
+<h2 class="font-h3 text-h3 text-cyan-400 font-bold uppercase tracking-widest text-sm">System Access</h2>
+<p class="font-caption text-caption text-slate-400">Data Sector 7</p>
+</div>
+</div>
+<button class="w-full bg-cyan-500/20 text-cyan-400 border border-cyan-400/50 rounded-lg py-2 flex items-center justify-center space-x-2 hover:bg-cyan-500/40 hover:shadow-[0_0_15px_rgba(0,229,255,0.5)] transition-all font-h3 text-sm">
+<span class="material-symbols-outlined">add</span>
+<span>New Repository</span>
+</button>
+</div>
+<div class="flex-1 flex flex-col gap-2">
+<!-- Active Tab -->
+<a class="flex items-center space-x-4 bg-cyan-500/10 text-cyan-400 border-r-4 border-cyan-400 px-6 py-3 font-['Space_Grotesk'] font-medium transition-colors hover:bg-white/5 hover:text-magenta-400 active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">trending_up</span>
+<span>Trending</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="flex items-center space-x-4 text-slate-500 px-6 py-3 font-['Space_Grotesk'] font-medium transition-colors hover:bg-white/5 hover:text-magenta-400 active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span>Developers</span>
+</a>
+<a class="flex items-center space-x-4 text-slate-500 px-6 py-3 font-['Space_Grotesk'] font-medium transition-colors hover:bg-white/5 hover:text-magenta-400 active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span>Repositories</span>
+</a>
+</div>
+<div class="mt-auto mb-8 flex flex-col gap-2">
+<a class="flex items-center space-x-4 text-slate-500 px-6 py-3 font-['Space_Grotesk'] font-medium transition-colors hover:bg-white/5 hover:text-magenta-400 active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Docs</span>
+</a>
+<a class="flex items-center space-x-4 text-slate-500 px-6 py-3 font-['Space_Grotesk'] font-medium transition-colors hover:bg-white/5 hover:text-magenta-400 active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined">support_agent</span>
+<span>Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col ml-64 relative min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-[calc(100%-16rem)] z-50 flex justify-between items-center px-8 h-16 bg-black/60 backdrop-blur-2xl border-b border-cyan-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+<div class="text-2xl font-black text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.8)] font-['Space_Grotesk'] tracking-wider uppercase">
+                NovaStar Dashboard
+            </div>
+<div class="flex items-center space-x-6 font-['Space_Grotesk'] tracking-wider uppercase text-sm">
+<!-- Search & Filters -->
+<div class="flex items-center space-x-4">
+<div class="flex space-x-6">
+<a class="text-slate-400 transition-all duration-300 ease-out hover:scale-105 hover:text-cyan-300 hover:drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]" href="#">Time Range</a>
+<a class="text-slate-400 transition-all duration-300 ease-out hover:scale-105 hover:text-cyan-300 hover:drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]" href="#">Language</a>
+<a class="text-slate-400 transition-all duration-300 ease-out hover:scale-105 hover:text-cyan-300 hover:drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]" href="#">Advanced Filters</a>
+</div>
+</div>
+<!-- Trailing Icons -->
+<div class="flex items-center space-x-4 border-l border-cyan-500/30 pl-4">
+<button class="text-slate-400 hover:text-cyan-300 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-cyan-300 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="Commander Profile" class="w-8 h-8 rounded-full border border-cyan-400/50 ml-2" data-alt="A portrait of a futuristic commander in dark, high-tech armor with glowing cyan accents. Cyberpunk style, neon lighting, dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAomU9AKzWtx-kMeKdi1-ioA6q-LaI9R4XAGupvrsq2Ht6iynSkaO4I4CkKFBzeBQKti6v5ipsJoKvV3982iCwz5gA-lLjeR_Yn5XZt9DBwSTrgvurl6eT3_JFgzA9Noqd5e6iBh-l8R1i9I1FJ2ymJmeWc88CdyZKZGYmaAsKBzRWPPyX2-pGkHIuXF-2jojQoNiDRPRTFBulXxtxdP_I6Lyk01BUUH8eT0yq4TCbwxnHk9S9V1j5g1oB5Uh9KVB3lCMPkRPPeDHc"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 mt-16 p-8 relative z-10 flex flex-col gap-8">
+<!-- Filter Bar / Controls (Custom interpretation based on prompt) -->
+<div class="flex items-center justify-between bg-surface-glass backdrop-blur-xl border border-cyan-500/20 rounded-lg p-4 shadow-[0_0_20px_rgba(0,229,255,0.1)]">
+<div class="flex space-x-4">
+<div class="bg-black/50 border border-cyan-500/30 rounded px-4 py-2 flex items-center space-x-2 hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(0,229,255,0.3)] transition-all cursor-pointer">
+<span class="font-h3 text-sm text-cyan-400">Language:</span>
+<span class="font-body text-sm text-on-surface">All</span>
+<span class="material-symbols-outlined text-sm text-cyan-400">expand_more</span>
+</div>
+<div class="bg-black/50 border border-cyan-500/30 rounded px-4 py-2 flex items-center space-x-2 hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(0,229,255,0.3)] transition-all cursor-pointer">
+<span class="font-h3 text-sm text-cyan-400">Time:</span>
+<span class="font-body text-sm text-on-surface">Today</span>
+<span class="material-symbols-outlined text-sm text-cyan-400">expand_more</span>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500/50 group-hover:text-cyan-400 transition-colors">search</span>
+<input class="bg-black/50 border border-cyan-500/30 rounded pl-10 pr-4 py-2 font-body text-sm text-on-surface placeholder-cyan-500/30 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 focus:shadow-[0_0_15px_rgba(0,229,255,0.4)] transition-all w-64" placeholder="Search Repositories..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Bento Grid of Repo Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-glass backdrop-blur-[24px] border border-cyan-400/20 rounded-xl p-6 relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:border-secondary-container hover:shadow-[0_0_20px_rgba(255,71,154,0.3)]">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent group-hover:via-secondary-container"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-h2 text-xl text-primary-fixed drop-shadow-[0_0_5px_rgba(156,240,255,0.5)] group-hover:text-secondary-fixed transition-colors">quantum-core/neo-sync</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1">High-frequency distributed state synchronization protocol for neural clusters.</p>
+</div>
+<span class="material-symbols-outlined text-slate-500 cursor-move hover:text-cyan-400">drag_indicator</span>
+</div>
+<div class="flex items-center space-x-4 mb-6">
+<div class="flex items-center space-x-1 text-warning">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-data-display text-sm font-bold">14.2k</span>
+</div>
+<div class="flex items-center space-x-1 text-slate-400">
+<span class="material-symbols-outlined text-sm">fork_right</span>
+<span class="font-data-display text-sm">3.1k</span>
+</div>
+</div>
+<div class="h-8 w-full border-b border-cyan-900/30 relative flex items-end pb-1 gap-1">
+<!-- Sparkline mock -->
+<div class="w-1/6 h-[20%] bg-cyan-900/50 rounded-t"></div>
+<div class="w-1/6 h-[40%] bg-cyan-800/60 rounded-t"></div>
+<div class="w-1/6 h-[30%] bg-cyan-700/70 rounded-t"></div>
+<div class="w-1/6 h-[70%] bg-cyan-600/80 rounded-t"></div>
+<div class="w-1/6 h-[50%] bg-cyan-500/90 rounded-t"></div>
+<div class="w-1/6 h-[90%] bg-cyan-400 rounded-t shadow-[0_0_8px_rgba(0,229,255,0.8)]"></div>
+</div>
+<div class="mt-4 flex flex-wrap gap-2">
+<span class="px-2 py-1 rounded bg-cyan-900/20 text-cyan-400 border border-cyan-500/20 font-caption text-xs">Rust</span>
+<span class="px-2 py-1 rounded bg-cyan-900/20 text-cyan-400 border border-cyan-500/20 font-caption text-xs">WebAssembly</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-glass backdrop-blur-[24px] border border-cyan-400/20 rounded-xl p-6 relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:border-secondary-container hover:shadow-[0_0_20px_rgba(255,71,154,0.3)]">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent group-hover:via-secondary-container"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-h2 text-xl text-primary-fixed drop-shadow-[0_0_5px_rgba(156,240,255,0.5)] group-hover:text-secondary-fixed transition-colors">cyber-ui/glass-kit</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1">A comprehensive toolkit for building volumetric holographic interfaces.</p>
+</div>
+<span class="material-symbols-outlined text-slate-500 cursor-move hover:text-cyan-400">drag_indicator</span>
+</div>
+<div class="flex items-center space-x-4 mb-6">
+<div class="flex items-center space-x-1 text-warning">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-data-display text-sm font-bold">8.9k</span>
+</div>
+<div class="flex items-center space-x-1 text-slate-400">
+<span class="material-symbols-outlined text-sm">fork_right</span>
+<span class="font-data-display text-sm">1.2k</span>
+</div>
+</div>
+<div class="h-8 w-full border-b border-cyan-900/30 relative flex items-end pb-1 gap-1">
+<!-- Sparkline mock -->
+<div class="w-1/6 h-[60%] bg-cyan-900/50 rounded-t"></div>
+<div class="w-1/6 h-[50%] bg-cyan-800/60 rounded-t"></div>
+<div class="w-1/6 h-[70%] bg-cyan-700/70 rounded-t"></div>
+<div class="w-1/6 h-[65%] bg-cyan-600/80 rounded-t"></div>
+<div class="w-1/6 h-[80%] bg-cyan-500/90 rounded-t"></div>
+<div class="w-1/6 h-[85%] bg-cyan-400 rounded-t shadow-[0_0_8px_rgba(0,229,255,0.8)]"></div>
+</div>
+<div class="mt-4 flex flex-wrap gap-2">
+<span class="px-2 py-1 rounded bg-cyan-900/20 text-cyan-400 border border-cyan-500/20 font-caption text-xs">TypeScript</span>
+<span class="px-2 py-1 rounded bg-cyan-900/20 text-cyan-400 border border-cyan-500/20 font-caption text-xs">CSS</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-glass backdrop-blur-[24px] border border-cyan-400/20 rounded-xl p-6 relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:border-secondary-container hover:shadow-[0_0_20px_rgba(255,71,154,0.3)]">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent group-hover:via-secondary-container"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-h2 text-xl text-primary-fixed drop-shadow-[0_0_5px_rgba(156,240,255,0.5)] group-hover:text-secondary-fixed transition-colors">void-ops/dark-matter-db</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1">Zero-gravity relational database optimized for deep space latency.</p>
+</div>
+<span class="material-symbols-outlined text-slate-500 cursor-move hover:text-cyan-400">drag_indicator</span>
+</div>
+<div class="flex items-center space-x-4 mb-6">
+<div class="flex items-center space-x-1 text-warning">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-data-display text-sm font-bold">45.3k</span>
+</div>
+<div class="flex items-center space-x-1 text-slate-400">
+<span class="material-symbols-outlined text-sm">fork_right</span>
+<span class="font-data-display text-sm">8.4k</span>
+</div>
+</div>
+<div class="h-8 w-full border-b border-cyan-900/30 relative flex items-end pb-1 gap-1">
+<!-- Sparkline mock -->
+<div class="w-1/6 h-[30%] bg-cyan-900/50 rounded-t"></div>
+<div class="w-1/6 h-[35%] bg-cyan-800/60 rounded-t"></div>
+<div class="w-1/6 h-[60%] bg-cyan-700/70 rounded-t"></div>
+<div class="w-1/6 h-[50%] bg-cyan-600/80 rounded-t"></div>
+<div class="w-1/6 h-[75%] bg-cyan-500/90 rounded-t"></div>
+<div class="w-1/6 h-[100%] bg-cyan-400 rounded-t shadow-[0_0_8px_rgba(0,229,255,0.8)]"></div>
+</div>
+<div class="mt-4 flex flex-wrap gap-2">
+<span class="px-2 py-1 rounded bg-cyan-900/20 text-cyan-400 border border-cyan-500/20 font-caption text-xs">C++</span>
+<span class="px-2 py-1 rounded bg-cyan-900/20 text-cyan-400 border border-cyan-500/20 font-caption text-xs">Go</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Status Bar Bottom -->
+<div class="mt-auto h-10 border-t border-cyan-900/50 bg-black/80 backdrop-blur-md flex items-center px-8 z-20">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,229,255,0.8)]"></div>
+<span class="font-h3 text-xs tracking-widest uppercase text-cyan-400">System Status: All Sectors Synchronized</span>
+</div>
+</div>
+</div>
+</body></html>

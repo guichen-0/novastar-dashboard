@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>全球数据互联网络 - 极致版</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#e1e2e4",
+                        "secondary-fixed": "#ffd9e3",
+                        "on-primary-fixed-variant": "#004f58",
+                        "secondary-container": "#ff479a",
+                        "warning": "#F59E0B",
+                        "secondary": "#ffb0ca",
+                        "on-secondary-fixed": "#3e001f",
+                        "primary-fixed-dim": "#00daf3",
+                        "surface-container-highest": "#323537",
+                        "on-tertiary-container": "#6834d1",
+                        "primary-fixed": "#9cf0ff",
+                        "surface-glass": "hsla(222, 47%, 8%, 0.8)",
+                        "on-error": "#690005",
+                        "glow-cyan": "rgba(0, 229, 255, 0.5)",
+                        "background-alt": "#111827",
+                        "surface-bright": "#37393b",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#3c0091",
+                        "error": "#EF4444",
+                        "secondary-fixed-dim": "#ffb0ca",
+                        "outline-variant": "#3b494c",
+                        "error-container": "#93000a",
+                        "background-hover": "#1F2937",
+                        "glow-magenta": "rgba(255, 0, 144, 0.5)",
+                        "on-background": "#e1e2e4",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "outline": "#849396",
+                        "info": "#3B82F6",
+                        "primary-container": "#00e5ff",
+                        "on-secondary-fixed-variant": "#8d004d",
+                        "primary": "#c3f5ff",
+                        "on-secondary-container": "#58002e",
+                        "surface-tint": "#00daf3",
+                        "background": "#0A0E1A",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "on-primary-container": "#00626e",
+                        "inverse-primary": "#006875",
+                        "surface-container-high": "#282a2c",
+                        "on-primary-fixed": "#001f24",
+                        "on-tertiary-fixed": "#23005c",
+                        "surface-container": "#1d2022",
+                        "on-primary": "#00363d",
+                        "surface-variant": "#323537",
+                        "surface-container-lowest": "#0c0f10",
+                        "success": "#22C55E",
+                        "tertiary": "#f2e9ff",
+                        "surface-dim": "#111415",
+                        "on-secondary": "#640035",
+                        "inverse-on-surface": "#2e3132",
+                        "surface": "#111415",
+                        "surface-container-low": "#191c1e",
+                        "on-surface-variant": "#bac9cc",
+                        "inverse-surface": "#e1e2e4",
+                        "tertiary-fixed": "#e9ddff",
+                        "tertiary-container": "#d9c8ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "page-margin": "48px",
+                        "base": "4px",
+                        "lg": "24px",
+                        "gutter": "16px",
+                        "xl": "40px"
+                    },
+                    "fontFamily": {
+                        "caption": ["Inter"],
+                        "h2": ["Space Grotesk"],
+                        "h1": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "data-display": ["Inter"],
+                        "h3": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "h2": ["2.25rem", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "h1": ["3rem", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "data-display": ["24px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "h3": ["1.75rem", { "lineHeight": "1.4", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom Utilities for Glassmorphism & Cyberpunk feel not covered by tailwind config easily */
+        .glass-panel {
+            background: linear-gradient(180deg, rgba(10, 14, 26, 0.7) 0%, rgba(17, 24, 39, 0.9) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .scan-line {
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 229, 255, 0.2) 50%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body h-screen w-screen overflow-hidden flex relative selection:bg-primary-container selection:text-on-primary-container">
+<!-- Immersive Background Canvas -->
+<div class="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&amp;w=2072&amp;auto=format&amp;fit=crop')] bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none" data-alt="A highly detailed, cinematic space vista featuring a deep, dark cosmic background scattered with faint, glowing star fields and subtle nebulae gas clouds. The lighting is low-key with intense highlights of cyan and deep magenta to match a high-tech, cyberpunk UI aesthetic. The mood is vast, mysterious, and technologically advanced, perfect for a high-density data network visualization.">
+<!-- Overlay Gradient to blend with background color -->
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background"></div>
+</div>
+<!-- SideNavBar (from JSON) -->
+<nav class="hidden md:flex bg-slate-950/60 backdrop-blur-2xl text-cyan-400 font-['Space_Grotesk'] antialiased h-screen w-64 border-r border-cyan-500/20 divide-y divide-cyan-900/50 shadow-[5px_0_25px_rgba(0,0,0,0.5)] fixed left-0 top-0 flex-col z-40 transition-transform duration-300 ease-out">
+<!-- Header -->
+<div class="p-6 flex items-center gap-4 border-b border-cyan-900/50">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-slate-800 border border-cyan-500/50 overflow-hidden flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+<span class="material-symbols-outlined text-cyan-300 text-2xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shield_person</span>
+</div>
+</div>
+<div>
+<h3 class="font-h3 text-cyan-100 text-lg m-0 leading-tight">指挥官</h3>
+<span class="font-caption text-cyan-500/70">第07号扇区</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 py-4 flex flex-col gap-2 px-2 overflow-y-auto">
+<!-- Inactive Tab 1 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-slate-500 hover:text-cyan-300 hover:bg-slate-800/40 hover:translate-x-1 transition-all duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-cyan-400 transition-colors">dashboard</span>
+<span class="font-body tracking-wide">主视图</span>
+</a>
+<!-- Inactive Tab 2 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-slate-500 hover:text-cyan-300 hover:bg-slate-800/40 hover:translate-x-1 transition-all duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-cyan-400 transition-colors">satellite_alt</span>
+<span class="font-body tracking-wide">卫星矩阵</span>
+</a>
+<!-- Active Tab 3 (Semantic Match for this page) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-md bg-cyan-500/20 border-l-4 border-cyan-400 text-cyan-100 shadow-[inset_0_0_15px_rgba(0,229,255,0.2)] hover:translate-x-1 transition-all duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-xl text-cyan-300 drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">public</span>
+<span class="font-body tracking-wide font-medium">全息地球</span>
+</a>
+<!-- Inactive Tab 4 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-slate-500 hover:text-cyan-300 hover:bg-slate-800/40 hover:translate-x-1 transition-all duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-cyan-400 transition-colors">terminal</span>
+<span class="font-body tracking-wide">通讯终端</span>
+</a>
+<!-- Inactive Tab 5 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-slate-500 hover:text-cyan-300 hover:bg-slate-800/40 hover:translate-x-1 transition-all duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-cyan-400 transition-colors">security</span>
+<span class="font-body tracking-wide">安全协议</span>
+</a>
+</div>
+<!-- CTA & Footer -->
+<div class="p-4 border-t border-cyan-900/50 flex flex-col gap-4">
+<button class="w-full py-3 bg-cyan-500/10 border border-cyan-400/50 text-cyan-300 font-body tracking-widest rounded-md hover:bg-cyan-400/20 hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] hover:border-cyan-300 transition-all duration-300 flex justify-center items-center gap-2 active:scale-95">
+<span class="material-symbols-outlined text-lg">rocket_launch</span>
+                发射程序
+            </button>
+<a class="flex items-center gap-3 px-4 py-2 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-red-400 transition-colors">logout</span>
+<span class="font-body tracking-wide">退出系统</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col ml-0 md:ml-64 relative z-10 w-full h-full">
+<!-- TopAppBar (from JSON) -->
+<header class="bg-slate-900/40 backdrop-blur-xl text-cyan-400 font-['Space_Grotesk'] tracking-widest uppercase border-b border-cyan-500/30 shadow-[0_0_20px_rgba(0,229,255,0.15)] flex justify-between items-center w-full px-6 py-4 h-20 flex-shrink-0 relative z-30">
+<!-- Brand -->
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-3xl text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.8)]">memory</span>
+<h1 class="text-2xl font-black text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.8)] m-0">星际指挥中心</h1>
+</div>
+<!-- Navigation Links (Visible on larger screens, hidden on mobile) -->
+<nav class="hidden lg:flex items-center gap-6 h-full border-b border-cyan-500/20">
+<a class="text-slate-400 hover:text-cyan-200 transition-colors hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] px-3 py-2 rounded-sm text-sm" href="#">实时监控</a>
+<a class="text-cyan-300 border-b-2 border-cyan-400 pb-1 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] px-3 pt-2 text-sm" href="#">轨道追踪</a>
+<a class="text-slate-400 hover:text-cyan-200 transition-colors hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] px-3 py-2 rounded-sm text-sm" href="#">全球连接</a>
+<a class="text-slate-400 hover:text-cyan-200 transition-colors hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] px-3 py-2 rounded-sm text-sm" href="#">系统状态</a>
+</nav>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-cyan-200 transition-colors hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] p-2 rounded-full scale-105 transition-transform duration-300 ease-out">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-cyan-200 transition-colors hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] p-2 rounded-full scale-105 transition-transform duration-300 ease-out">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="text-slate-400 hover:text-cyan-200 transition-colors hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] p-2 rounded-full scale-105 transition-transform duration-300 ease-out">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Canvas Area -->
+<main class="flex-1 flex flex-col relative w-full h-[calc(100vh-5rem)] overflow-hidden">
+<!-- 3D Earth Visualization Area (65% Height) -->
+<div class="relative w-full h-[65%] flex items-center justify-center flex-shrink-0 z-10 pt-4">
+<!-- Background ambient glow for the central area -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px]"></div>
+</div>
+<!-- The Earth Hologram -->
+<div class="relative w-[450px] h-[450px] md:w-[550px] md:h-[550px] rounded-full border border-primary-container/30 bg-surface-glass shadow-[inset_0_0_80px_rgba(0,229,255,0.2),0_0_100px_rgba(0,229,255,0.15)] flex items-center justify-center overflow-hidden">
+<!-- Base Dark Sphere -->
+<div class="absolute inset-0 bg-gradient-to-br from-background-alt via-surface-container-highest to-background opacity-90"></div>
+<!-- Cyan Grid Overlay (Longitude/Latitude simulation) -->
+<svg class="absolute inset-0 w-full h-full opacity-30" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="10" id="grid" patternunits="userSpaceOnUse" width="10">
+<path d="M 10 0 L 0 0 0 10" fill="none" stroke="#00e5ff" stroke-width="0.2"></path>
+</pattern>
+</defs>
+<!-- Apply pattern with a radial mask to simulate sphere curvature -->
+<mask id="sphere-mask">
+<circle cx="50" cy="50" fill="white" r="49"></circle>
+</mask>
+<rect fill="url(#grid)" height="100" mask="url(#sphere-mask)" style="transform-origin: center; transform: scale(1.5) perspective(100px) rotateX(20deg);" width="100"></rect>
+<circle cx="50" cy="50" fill="none" opacity="0.8" r="49.5" stroke="#00e5ff" stroke-width="0.5"></circle>
+<!-- Equator and Prime Meridian -->
+<ellipse cx="50" cy="50" fill="none" opacity="0.6" rx="49" ry="15" stroke="#00e5ff" stroke-width="0.3"></ellipse>
+<path d="M 50 1 A 20 49 0 0 0 50 99" fill="none" opacity="0.6" stroke="#00e5ff" stroke-width="0.3"></path>
+<path d="M 50 1 A 20 49 0 0 1 50 99" fill="none" opacity="0.6" stroke="#00e5ff" stroke-width="0.3"></path>
+</svg>
+<!-- Rain Heatmap Layer (Blue-Green blobs) -->
+<div class="absolute w-[60%] h-[40%] top-[20%] left-[10%] bg-info/20 blur-[20px] rounded-[100%] mix-blend-screen"></div>
+<div class="absolute w-[40%] h-[30%] bottom-[30%] right-[15%] bg-success/10 blur-[15px] rounded-[100%] mix-blend-screen"></div>
+<!-- Aurora Belt (Top) -->
+<div class="absolute w-[80%] h-[15%] top-[5%] left-[10%] bg-gradient-to-r from-transparent via-primary-container/40 to-transparent blur-[12px] rounded-[100%] mix-blend-screen" style="transform: rotate(-10deg);"></div>
+<!-- Data Points & Map Elements -->
+<div class="absolute inset-0 w-full h-full" style="perspective: 800px;">
+<!-- Simulated Continental Outlines (Abstracted) -->
+<svg class="absolute inset-0 w-full h-full opacity-40" fill="none" stroke="#00daf3" stroke-width="0.3" viewbox="0 0 100 100">
+<path d="M 20 30 Q 30 20 40 35 T 60 40 T 75 30 T 80 50 T 65 65 T 45 75 T 25 60 Z"></path>
+<path d="M 5 50 Q 15 45 20 60 T 10 70 Z"></path>
+</svg>
+<!-- Active City Nodes (Cyan) -->
+<div class="absolute top-[35%] left-[40%] w-1.5 h-1.5 bg-primary-container rounded-full shadow-[0_0_10px_#00e5ff]"></div>
+<div class="absolute top-[40%] left-[60%] w-2 h-2 bg-primary-container rounded-full shadow-[0_0_12px_#00e5ff]"></div>
+<div class="absolute top-[60%] left-[45%] w-1.5 h-1.5 bg-primary-container rounded-full shadow-[0_0_10px_#00e5ff]"></div>
+<div class="absolute top-[30%] left-[75%] w-1 h-1 bg-primary-container rounded-full shadow-[0_0_8px_#00e5ff]"></div>
+<div class="absolute top-[50%] left-[25%] w-1.5 h-1.5 bg-primary-container rounded-full shadow-[0_0_10px_#00e5ff]"></div>
+<!-- Earthquake Markers (Magenta Pulse) -->
+<div class="absolute top-[65%] left-[65%]">
+<div class="w-2 h-2 bg-secondary-container rounded-full shadow-[0_0_15px_#ff479a] relative">
+<div class="absolute inset-0 rounded-full border border-secondary-container opacity-50 scale-[2.5]"></div>
+</div>
+</div>
+<div class="absolute top-[25%] left-[30%]">
+<div class="w-1.5 h-1.5 bg-secondary-container rounded-full shadow-[0_0_10px_#ff479a] relative">
+<div class="absolute inset-0 rounded-full border border-secondary-container opacity-40 scale-150"></div>
+</div>
+</div>
+<!-- Fire Hotspots (Warning/Orange) -->
+<div class="absolute top-[45%] left-[35%] w-1 h-1 bg-warning rounded-full shadow-[0_0_8px_#F59E0B]"></div>
+<div class="absolute top-[48%] left-[37%] w-1.5 h-1.5 bg-warning rounded-full shadow-[0_0_10px_#F59E0B]"></div>
+<div class="absolute top-[70%] left-[40%] w-1 h-1 bg-warning rounded-full shadow-[0_0_8px_#F59E0B]"></div>
+<!-- Connecting Arcs (Flowing light points simulated with dashed borders) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" viewbox="0 0 100 100">
+<path d="M 40 35 Q 50 20 60 40" fill="none" stroke="rgba(0,229,255,0.4)" stroke-dasharray="1 2" stroke-width="0.4"></path>
+<path d="M 60 40 Q 55 55 45 60" fill="none" stroke="rgba(0,229,255,0.6)" stroke-width="0.3"></path>
+<path d="M 45 60 Q 30 55 25 50" fill="none" stroke="rgba(0,229,255,0.3)" stroke-dasharray="2 1" stroke-width="0.2"></path>
+<path d="M 40 35 Q 35 45 25 50" fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="0.5"></path>
+<path d="M 60 40 Q 70 35 75 30" fill="none" stroke="rgba(0,229,255,0.4)" stroke-dasharray="1 1" stroke-width="0.3"></path>
+</svg>
+</div>
+<!-- Atmosphere / Edge Bloom Overlay -->
+<div class="absolute inset-0 rounded-full shadow-[inset_0_0_30px_rgba(0,229,255,0.4)] pointer-events-none"></div>
+</div>
+<!-- Satellite Orbits (External Rings) -->
+<div class="absolute w-[600px] h-[600px] md:w-[750px] md:h-[750px] rounded-full border border-primary-container/10 pointer-events-none" style="transform: rotateX(70deg) rotateY(10deg);">
+<!-- ISS Position Indicator -->
+<div class="absolute top-[10%] left-[80%] flex items-center gap-2" style="transform: rotateX(-70deg) rotateY(-10deg);">
+<div class="w-2 h-2 bg-white rounded-full shadow-[0_0_15px_#ffffff]"></div>
+<span class="font-caption text-xs text-white/80 tracking-widest bg-background/50 px-1 rounded backdrop-blur-sm">ISS LEO</span>
+</div>
+</div>
+<div class="absolute w-[500px] h-[500px] md:w-[650px] md:h-[650px] rounded-full border border-outline-variant/20 pointer-events-none" style="transform: rotateX(65deg) rotateY(-20deg);">
+<div class="absolute top-[80%] left-[20%] w-1.5 h-1.5 bg-tertiary-fixed-dim rounded-full shadow-[0_0_10px_#d0bcff]"></div>
+</div>
+<!-- HUD Decorative Elements -->
+<div class="absolute top-8 left-8 flex flex-col gap-1 opacity-60">
+<div class="w-16 h-px bg-primary-container/50"></div>
+<div class="w-8 h-px bg-primary-container/30"></div>
+<span class="font-data-display text-[10px] text-primary-container tracking-widest mt-1">SYS.ONLINE</span>
+</div>
+<div class="absolute bottom-8 right-8 flex flex-col items-end gap-1 opacity-60">
+<span class="font-data-display text-[10px] text-primary-container tracking-widest mb-1">LAT/LNG SYNC</span>
+<div class="w-16 h-px bg-primary-container/50"></div>
+<div class="w-8 h-px bg-primary-container/30"></div>
+</div>
+</div>
+<!-- Data Source Status Indicators -->
+<div class="flex-shrink-0 w-full py-4 z-20 overflow-x-auto scrollbar-hide">
+<div class="flex justify-center items-center gap-3 px-6 min-w-max mx-auto">
+<!-- Source Chip: GitHub -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_#22C55E]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">GitHub</span>
+</div>
+<!-- Source Chip: NASA -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_#22C55E]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">NASA API</span>
+</div>
+<!-- Source Chip: USGS -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-warning shadow-[0_0_8px_#F59E0B]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">USGS Quake</span>
+</div>
+<!-- Source Chip: CelesTrak -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_#22C55E]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">CelesTrak</span>
+</div>
+<!-- Source Chip: RainViewer -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-info shadow-[0_0_8px_#3B82F6]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">RainViewer</span>
+</div>
+<!-- Source Chip: FIRMS -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-error shadow-[0_0_8px_#EF4444]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">FIRMS</span>
+</div>
+<!-- Source Chip: NOAA -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_#22C55E]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">NOAA</span>
+</div>
+<!-- Source Chip: World Bank -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-outline-variant/40 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-outline shadow-[0_0_8px_#849396]"></div>
+<span class="font-caption text-xs text-on-surface-variant tracking-wider uppercase">世界银行</span>
+</div>
+</div>
+</div>
+<!-- Stats Cards Area (Bottom) -->
+<div class="flex-1 px-6 pb-6 z-20 flex flex-col justify-end">
+<div class="grid grid-cols-2 lg:grid-cols-6 gap-4 w-full">
+<!-- Card 1: 全球节点 -->
+<div class="glass-panel border border-primary-container/20 rounded-lg p-4 relative group hover:border-primary-container/50 transition-colors">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-primary-container">hub</span>
+<h4 class="font-caption text-on-surface-variant m-0">全球节点</h4>
+</div>
+<div class="font-data-display text-2xl text-on-surface font-semibold tracking-wider">12,482</div>
+<div class="font-caption text-xs text-success mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">trending_up</span> +342 今日
+                        </div>
+</div>
+<!-- Card 2: 活跃卫星 -->
+<div class="glass-panel border border-primary-container/20 rounded-lg p-4 relative group hover:border-primary-container/50 transition-colors">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-primary-container">satellite</span>
+<h4 class="font-caption text-on-surface-variant m-0">活跃卫星</h4>
+</div>
+<div class="font-data-display text-2xl text-on-surface font-semibold tracking-wider">8,930</div>
+<div class="font-caption text-xs text-success mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">trending_up</span> LEO 轨道优良
+                        </div>
+</div>
+<!-- Card 3: 活跃连接 -->
+<div class="glass-panel border border-primary-container/20 rounded-lg p-4 relative group hover:border-primary-container/50 transition-colors">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-primary-container">wifi_tethering</span>
+<h4 class="font-caption text-on-surface-variant m-0">活跃连接</h4>
+</div>
+<div class="font-data-display text-2xl text-on-surface font-semibold tracking-wider">4.2B</div>
+<div class="font-caption text-xs text-primary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">sync</span> 实时同步中
+                        </div>
+</div>
+<!-- Card 4: 今日地震 -->
+<div class="glass-panel border border-secondary-container/20 rounded-lg p-4 relative group hover:border-secondary-container/50 transition-colors">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-secondary-container to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-secondary-container">earthquake</span>
+<h4 class="font-caption text-on-surface-variant m-0">今日地震</h4>
+</div>
+<div class="font-data-display text-2xl text-on-surface font-semibold tracking-wider">14</div>
+<div class="font-caption text-xs text-secondary-container mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">warning</span> 最大震级 5.2
+                        </div>
+</div>
+<!-- Card 5: 降雨覆盖 -->
+<div class="glass-panel border border-info/20 rounded-lg p-4 relative group hover:border-info/50 transition-colors">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-info to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-info">rainy</span>
+<h4 class="font-caption text-on-surface-variant m-0">降雨覆盖</h4>
+</div>
+<div class="font-data-display text-2xl text-on-surface font-semibold tracking-wider">18%</div>
+<div class="font-caption text-xs text-info mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">water_drop</span> 热带风暴警告
+                        </div>
+</div>
+<!-- Card 6: 活跃火灾 -->
+<div class="glass-panel border border-warning/20 rounded-lg p-4 relative group hover:border-warning/50 transition-colors">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-warning to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-warning">local_fire_department</span>
+<h4 class="font-caption text-on-surface-variant m-0">活跃火灾</h4>
+</div>
+<div class="font-data-display text-2xl text-on-surface font-semibold tracking-wider">3,102</div>
+<div class="font-caption text-xs text-warning mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">emergency</span> FIRMS 高置信度
+                        </div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

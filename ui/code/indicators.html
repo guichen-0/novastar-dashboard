@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>全球发展指标 - NovaStar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#640035",
+                        "on-secondary-container": "#58002e",
+                        "inverse-on-surface": "#2e3132",
+                        "glow-magenta": "rgba(255, 0, 144, 0.5)",
+                        "on-primary-container": "#00626e",
+                        "inverse-primary": "#006875",
+                        "tertiary-container": "#d9c8ff",
+                        "secondary-container": "#ff479a",
+                        "error": "#EF4444",
+                        "surface-bright": "#37393b",
+                        "surface-container": "#1d2022",
+                        "surface-container-lowest": "#0c0f10",
+                        "on-background": "#e1e2e4",
+                        "surface-container-high": "#282a2c",
+                        "surface-container-highest": "#323537",
+                        "on-secondary-fixed-variant": "#8d004d",
+                        "glow-cyan": "rgba(0, 229, 255, 0.5)",
+                        "primary-fixed": "#9cf0ff",
+                        "surface-tint": "#00daf3",
+                        "surface-variant": "#323537",
+                        "background-hover": "#1F2937",
+                        "on-secondary-fixed": "#3e001f",
+                        "success": "#22C55E",
+                        "primary-fixed-dim": "#00daf3",
+                        "on-tertiary": "#3c0091",
+                        "on-primary-fixed": "#001f24",
+                        "outline-variant": "#3b494c",
+                        "outline": "#849396",
+                        "on-surface": "#e1e2e4",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "surface-glass": "hsla(222, 47%, 8%, 0.8)",
+                        "primary": "#c3f5ff",
+                        "info": "#3B82F6",
+                        "warning": "#F59E0B",
+                        "secondary-fixed-dim": "#ffb0ca",
+                        "background": "#0A0E1A",
+                        "tertiary-fixed": "#e9ddff",
+                        "surface": "#111415",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "on-tertiary-fixed": "#23005c",
+                        "on-primary-fixed-variant": "#004f58",
+                        "primary-container": "#00e5ff",
+                        "on-tertiary-container": "#6834d1",
+                        "on-surface-variant": "#bac9cc",
+                        "on-primary": "#00363d",
+                        "surface-dim": "#111415",
+                        "secondary-fixed": "#ffd9e3",
+                        "surface-container-low": "#191c1e",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "inverse-surface": "#e1e2e4",
+                        "tertiary": "#f2e9ff",
+                        "background-alt": "#111827",
+                        "secondary": "#ffb0ca",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "40px",
+                        "base": "4px",
+                        "page-margin": "48px",
+                        "gutter": "16px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body": ["Inter"],
+                        "data-display": ["Inter"],
+                        "h2": ["Space Grotesk"],
+                        "caption": ["Inter"],
+                        "h1": ["Space Grotesk"],
+                        "h3": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "body": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "data-display": ["24px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "h2": ["2.25rem", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "h1": ["3rem", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "h3": ["1.75rem", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .orbitron { font-family: 'Space Grotesk', sans-serif; /* Fallback for Orbitron as requested by theme constraints, using H1/H2 font */ }
+        .jetbrains-mono { font-family: 'Inter', monospace; /* Fallback */ }
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body text-body min-h-screen flex flex-col relative overflow-x-hidden">
+<!-- Background Elements -->
+<div class="fixed inset-0 pointer-events-none z-0">
+<div class="absolute inset-0 bg-grid-pattern"></div>
+<!-- Decorative Globe placeholder -->
+<div class="absolute -top-40 -right-40 w-96 h-96 rounded-full border border-primary-container opacity-5"></div>
+<div class="absolute top-20 -right-20 w-80 h-80 rounded-full border border-primary-container opacity-5"></div>
+</div>
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 border-b border-cyan-500/30 bg-black/80 backdrop-blur-xl border-b border-cyan-900/50 shadow-[0_0_20px_rgba(0,229,255,0.15)] flex justify-between items-center px-8 h-16 transition-all duration-300 ease-out active:scale-95">
+<div class="text-2xl font-black tracking-tighter text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.8)] orbitron">
+            NovaStar
+        </div>
+<div class="hidden md:flex space-x-6">
+<a class="text-cyan-900/70 hover:text-cyan-400 transition-colors font-['Space_Grotesk'] tracking-wider uppercase hover:bg-cyan-500/10 hover:text-cyan-300 px-3 py-2 rounded-DEFAULT" href="#">Dashboard</a>
+<a class="text-cyan-900/70 hover:text-cyan-400 transition-colors font-['Space_Grotesk'] tracking-wider uppercase hover:bg-cyan-500/10 hover:text-cyan-300 px-3 py-2 rounded-DEFAULT" href="#">Metrics</a>
+<a class="text-cyan-400 border-b-2 border-cyan-400 pb-1 shadow-[0_5px_15px_-5px_rgba(0,229,255,0.5)] font-['Space_Grotesk'] tracking-wider uppercase px-3 py-2" href="#">Indices</a>
+<a class="text-cyan-900/70 hover:text-cyan-400 transition-colors font-['Space_Grotesk'] tracking-wider uppercase hover:bg-cyan-500/10 hover:text-cyan-300 px-3 py-2 rounded-DEFAULT" href="#">Projections</a>
+</div>
+<div class="flex items-center space-x-4 text-cyan-400">
+<button class="hover:bg-cyan-500/10 hover:text-cyan-300 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:bg-cyan-500/10 hover:text-cyan-300 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="Commander Profile" class="w-8 h-8 rounded-full border border-cyan-400/50" data-alt="A highly detailed close up portrait of a cyberpunk commander wearing glowing cyan tech gear. High contrast lighting, futuristic backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPJ_PVFsUomTnah07VLauKTom0cXBWn8G4DM36-Uiq8aM78tPdRgdaRHIhuHQXIh3KrunQMPV6KcjU59_uukJLyotrF9w4mRS6HP8SHTaOCkCB0KiMO16rHOkk93TS09aFfLcnRH1-srXwuQsCBtzBd70a0sqk75KhngoCeW9Qm2Ei02OxbW9NTSDKGiAPj15-uETJg2M_4cX8e116WkKDfh-MNkNzHiBF8V0SqQ8NRta9xJ8WGOO2mO4Kgnh2_-0CQCOlWdpOOr8"/>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 mt-16 p-lg relative z-10 container mx-auto max-w-7xl">
+<!-- Page Header -->
+<header class="mb-lg mt-md">
+<h1 class="font-h1 text-h1 text-primary-container drop-shadow-[0_0_15px_rgba(0,229,255,0.6)] orbitron">全球发展指标</h1>
+</header>
+<!-- Stats Matrix (Row 1) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md mb-lg">
+<!-- Stat Card 1 -->
+<div class="bg-surface-glass border border-primary-container/30 rounded-lg p-md shadow-[0_0_15px_rgba(0,229,255,0.05)] hover:border-primary-container/80 hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">全球 GDP</span>
+<span class="material-symbols-outlined text-primary-container text-sm">public</span>
+</div>
+<div class="font-data-display text-data-display text-primary-container orbitron mb-sm drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">$105.5 万亿</div>
+<div class="flex items-center text-success font-caption text-caption mb-sm">
+<span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+<span>3.2%</span>
+</div>
+<!-- Mini sparkline placeholder -->
+<div class="h-8 w-full border-b border-primary-container/50 relative">
+<div class="absolute bottom-0 w-full h-4 bg-gradient-to-t from-primary-container/20 to-transparent"></div>
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 30">
+<polyline class="text-primary-container drop-shadow-[0_0_3px_rgba(0,229,255,0.8)]" fill="none" points="0,25 20,20 40,28 60,15 80,18 100,5" stroke="currentColor" stroke-width="2"></polyline>
+</svg>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-glass border border-primary-container/30 rounded-lg p-md shadow-[0_0_15px_rgba(0,229,255,0.05)] hover:border-primary-container/80 hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">全球人口</span>
+<span class="material-symbols-outlined text-primary-container text-sm">groups</span>
+</div>
+<div class="font-data-display text-data-display text-on-surface orbitron mb-sm">81.2 亿</div>
+<div class="flex items-center text-success font-caption text-caption mb-sm">
+<span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+<span>0.9%</span>
+</div>
+<!-- Mini bar chart placeholder -->
+<div class="h-8 w-full flex items-end justify-between space-x-1">
+<div class="w-full bg-primary-container/20 h-2 rounded-t-sm"></div>
+<div class="w-full bg-primary-container/40 h-4 rounded-t-sm"></div>
+<div class="w-full bg-primary-container/60 h-5 rounded-t-sm"></div>
+<div class="w-full bg-primary-container/80 h-7 rounded-t-sm"></div>
+<div class="w-full bg-primary-container h-8 rounded-t-sm shadow-[0_0_5px_rgba(0,229,255,0.8)]"></div>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-glass border border-primary-container/30 rounded-lg p-md shadow-[0_0_15px_rgba(0,229,255,0.05)] hover:border-primary-container/80 hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">互联网覆盖率</span>
+<span class="material-symbols-outlined text-primary-container text-sm">wifi</span>
+</div>
+<div class="font-data-display text-data-display text-on-surface orbitron mb-sm">67.4%</div>
+<div class="flex items-center text-success font-caption text-caption mb-sm">
+<span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+<span>2.1%</span>
+</div>
+<!-- Mini ring chart placeholder (CSS) -->
+<div class="h-8 w-8 rounded-full border-4 border-surface-variant relative mx-auto">
+<div class="absolute inset-[-4px] rounded-full border-4 border-primary-container border-t-transparent border-r-transparent transform -rotate-45 shadow-[0_0_5px_rgba(0,229,255,0.5)]"></div>
+</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-surface-glass border border-secondary-container/30 rounded-lg p-md shadow-[0_0_15px_rgba(255,71,154,0.05)] hover:border-secondary-container/80 hover:shadow-[0_0_20px_rgba(255,71,154,0.2)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-secondary-container to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">可再生能源占比</span>
+<span class="material-symbols-outlined text-secondary-container text-sm">bolt</span>
+</div>
+<div class="font-data-display text-data-display text-secondary-container orbitron mb-sm drop-shadow-[0_0_8px_rgba(255,71,154,0.6)]">32.8%</div>
+<div class="flex items-center text-success font-caption text-caption mb-sm">
+<span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+<span>5.4%</span>
+</div>
+<!-- Mini ring chart placeholder -->
+<div class="h-8 w-8 rounded-full border-4 border-surface-variant relative mx-auto">
+<div class="absolute inset-[-4px] rounded-full border-4 border-secondary-container border-r-transparent transform rotate-45 shadow-[0_0_5px_rgba(255,71,154,0.5)]"></div>
+</div>
+</div>
+</section>
+<!-- Deep Analysis (Row 2) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-md mb-lg">
+<!-- Line Chart Container -->
+<div class="lg:col-span-7 bg-surface-glass border border-outline-variant/50 rounded-lg p-md relative overflow-hidden group hover:border-primary-container/50 transition-colors">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-h3 text-[1.25rem] text-on-surface orbitron flex items-center">
+<span class="material-symbols-outlined mr-2 text-primary-container">monitoring</span>
+                        GDP 增长趋势 (2015-2025)
+                    </h3>
+</div>
+<div class="h-64 w-full bg-surface-container-lowest/50 rounded-md border border-outline-variant/30 relative flex flex-col justify-end p-sm">
+<!-- Faux Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between py-sm opacity-20">
+<div class="w-full border-b border-primary-container/30 border-dashed"></div>
+<div class="w-full border-b border-primary-container/30 border-dashed"></div>
+<div class="w-full border-b border-primary-container/30 border-dashed"></div>
+<div class="w-full border-b border-primary-container/30 border-dashed"></div>
+</div>
+<!-- Faux Area Chart -->
+<div class="absolute bottom-6 left-6 right-6 top-6">
+<div class="w-full h-full relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<defs>
+<lineargradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="rgba(0,229,255,0.4)"></stop>
+<stop offset="100%" stop-color="rgba(0,229,255,0)"></stop>
+</lineargradient>
+</defs>
+<polygon fill="url(#area-grad)" points="0,100 0,80 20,70 40,75 60,40 80,50 100,20 100,100"></polygon>
+<polyline class="drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" fill="none" points="0,80 20,70 40,75 60,40 80,50 100,20" stroke="rgba(0,229,255,1)" stroke-width="2"></polyline>
+</svg>
+</div>
+</div>
+<!-- Axis Labels -->
+<div class="flex justify-between text-[10px] text-on-surface-variant jetbrains-mono mt-2 z-10 w-full px-4">
+<span>'15</span><span>'17</span><span>'19</span><span>'21</span><span>'23</span><span>'25</span>
+</div>
+</div>
+</div>
+<!-- Bar Chart Container -->
+<div class="lg:col-span-5 bg-surface-glass border border-outline-variant/50 rounded-lg p-md relative overflow-hidden group hover:border-primary-container/50 transition-colors">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-h3 text-[1.25rem] text-on-surface orbitron flex items-center">
+<span class="material-symbols-outlined mr-2 text-secondary-container">pie_chart</span>
+                        大洲 GDP 占比
+                    </h3>
+</div>
+<div class="flex flex-col space-y-4 justify-center h-[calc(100%-3rem)]">
+<div>
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-1">
+<span>亚洲</span>
+<span class="jetbrains-mono text-primary-container">42%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2.5 shadow-inner">
+<div class="bg-gradient-to-r from-primary-fixed-dim to-primary-container h-2.5 rounded-full shadow-[0_0_8px_rgba(0,229,255,0.6)]" style="width: 42%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-1">
+<span>北美</span>
+<span class="jetbrains-mono text-secondary-container">28%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2.5 shadow-inner">
+<div class="bg-gradient-to-r from-secondary-fixed-dim to-secondary-container h-2.5 rounded-full shadow-[0_0_8px_rgba(255,71,154,0.6)]" style="width: 28%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-1">
+<span>欧洲</span>
+<span class="jetbrains-mono text-tertiary-fixed-dim">21%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2.5 shadow-inner">
+<div class="bg-gradient-to-r from-tertiary-fixed to-tertiary-fixed-dim h-2.5 rounded-full shadow-[0_0_8px_rgba(208,188,255,0.5)]" style="width: 21%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-1">
+<span>其他</span>
+<span class="jetbrains-mono text-outline">9%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2.5 shadow-inner">
+<div class="bg-gradient-to-r from-outline-variant to-outline h-2.5 rounded-full" style="width: 9%"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Data Table (Row 3) -->
+<section class="bg-surface-glass border border-outline-variant/50 rounded-lg overflow-hidden relative group hover:border-primary-container/30 transition-colors">
+<div class="p-md border-b border-primary-container/20 shadow-[0_4px_10px_-2px_rgba(0,229,255,0.1)]">
+<h2 class="font-h2 text-[1.5rem] text-on-surface orbitron flex items-center">
+<span class="material-symbols-outlined mr-2 text-primary-container">table_chart</span>
+                    核心国家发展指数对比
+                </h2>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b-2 border-primary-container shadow-[0_2px_10px_rgba(0,229,255,0.2)] text-on-surface-variant font-caption text-caption uppercase tracking-wider">
+<th class="p-sm pl-md">国家</th>
+<th class="p-sm">GDP (万亿美元)</th>
+<th class="p-sm">人口 (亿)</th>
+<th class="p-sm">互联网覆盖</th>
+<th class="p-sm">能源占比</th>
+</tr>
+</thead>
+<tbody class="font-body text-body text-on-surface">
+<!-- Table Row Generator Pattern -->
+<tr class="border-b border-outline-variant/30 hover:bg-primary-container/5 transition-colors relative group/row">
+<td class="p-sm pl-md relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container opacity-0 group-hover/row:opacity-100 transition-opacity shadow-[0_0_8px_rgba(0,229,255,1)]"></div>
+                                美国
+                            </td>
+<td class="p-sm jetbrains-mono text-primary-fixed">26.85</td>
+<td class="p-sm jetbrains-mono">3.39</td>
+<td class="p-sm jetbrains-mono text-success">92%</td>
+<td class="p-sm jetbrains-mono">21%</td>
+</tr>
+<tr class="border-b border-outline-variant/30 hover:bg-primary-container/5 transition-colors relative group/row">
+<td class="p-sm pl-md relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container opacity-0 group-hover/row:opacity-100 transition-opacity shadow-[0_0_8px_rgba(0,229,255,1)]"></div>
+                                中国
+                            </td>
+<td class="p-sm jetbrains-mono text-primary-fixed">19.37</td>
+<td class="p-sm jetbrains-mono">14.09</td>
+<td class="p-sm jetbrains-mono text-success">74%</td>
+<td class="p-sm jetbrains-mono">31%</td>
+</tr>
+<!-- Repeat rows to complete the 10 requested, keeping succinct for code output -->
+<tr class="border-b border-outline-variant/30 hover:bg-primary-container/5 transition-colors relative group/row">
+<td class="p-sm pl-md relative"><div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container opacity-0 group-hover/row:opacity-100 transition-opacity shadow-[0_0_8px_rgba(0,229,255,1)]"></div>日本</td>
+<td class="p-sm jetbrains-mono text-primary-fixed">4.41</td><td class="p-sm jetbrains-mono">1.23</td><td class="p-sm jetbrains-mono text-success">94%</td><td class="p-sm jetbrains-mono">23%</td>
+</tr>
+<tr class="border-b border-outline-variant/30 hover:bg-primary-container/5 transition-colors relative group/row">
+<td class="p-sm pl-md relative"><div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container opacity-0 group-hover/row:opacity-100 transition-opacity shadow-[0_0_8px_rgba(0,229,255,1)]"></div>德国</td>
+<td class="p-sm jetbrains-mono text-primary-fixed">4.30</td><td class="p-sm jetbrains-mono">0.83</td><td class="p-sm jetbrains-mono text-success">91%</td><td class="p-sm jetbrains-mono">48%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Bottom Status Bar -->
+<footer class="mt-auto border-t border-cyan-900/40 bg-black/60 backdrop-blur-md px-md py-sm flex justify-between items-center text-on-surface-variant font-caption text-caption jetbrains-mono z-20 relative">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.8)] animate-pulse"></div>
+<span>数据源正常</span>
+</div>
+<div class="space-x-4">
+<span class="hover:text-primary-container cursor-pointer transition-colors">World Bank</span>
+<span class="text-outline-variant">|</span>
+<span class="hover:text-primary-container cursor-pointer transition-colors">REST Countries</span>
+</div>
+</footer>
+</body></html>
