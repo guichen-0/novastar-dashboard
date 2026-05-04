@@ -2,16 +2,19 @@ interface GlassPanelProps {
   children: React.ReactNode;
   className?: string;
   title?: string;
+  style?: React.CSSProperties;
 }
 
 export function GlassPanel({
   children,
   className = "",
   title,
+  style,
 }: GlassPanelProps) {
   return (
     <div
       className={`glass-panel transition-all duration-300 hover:translate-y-[-2px] ${className}`}
+      style={style}
     >
       {title && (
         <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border)]">

@@ -1,5 +1,6 @@
 import { StatsCard } from "@/components/ui/StatsCard";
 import { GlassPanel } from "@/components/ui/GlassPanel";
+import { Globe } from "@/components/three/Globe";
 
 export default function DashboardPage() {
   return (
@@ -119,23 +120,7 @@ export default function DashboardPage() {
 
         {/* Center - Globe Area */}
         <div className="col-span-5 flex items-center justify-center relative">
-          {/* Globe Placeholder */}
-          <div className="w-80 h-80 rounded-full border border-[var(--cyan)] border-opacity-30 flex items-center justify-center relative">
-            <div className="absolute inset-0 rounded-full border border-[var(--cyan)] opacity-20 animate-pulse-glow" />
-            <div className="absolute inset-4 rounded-full border border-[var(--cyan)] opacity-10" />
-            <div className="absolute inset-8 rounded-full border border-[var(--cyan)] opacity-5" />
-            <div className="text-center">
-              <p
-                className="text-[var(--cyan)] text-sm"
-                style={{ fontFamily: "var(--font-orbitron)" }}
-              >
-                🌍
-              </p>
-              <p className="text-xs text-[var(--text-muted)] mt-2">
-                3D 地球加载中...
-              </p>
-            </div>
-          </div>
+          <Globe />
 
           {/* Floating Stats */}
           <div className="absolute top-4 right-4">
