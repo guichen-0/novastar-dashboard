@@ -19,7 +19,6 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
   useFrame(() => {
     if (!lightRef.current) return;
 
-    // Compute sun direction from astronomical position
     const now = new Date();
     const dayOfYear = Math.floor(
       (now.getTime() - new Date(Date.UTC(now.getUTCFullYear(), 0, 0)).getTime()) / 86400000
@@ -30,14 +29,13 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const declRad = (decl * Math.PI) / 180;
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
-    // DirectionalLight shines FROM its position TOWARD the scene origin.
-    // Negate sun direction so the light sits on the NIGHT side and shines
-    // toward the DAY side (illuminating the correct hemisphere).
+    // Three.js SphereGeometry: U=0.5 (0° lon) maps to -Z axis.
+    // So sun direction needs negative X and Z to align with geographic coordinates.
     const r = 10;
     lightRef.current.position.set(
-      -(Math.cos(declRad) * Math.sin(sunLon)) * r,
+      Math.cos(declRad) * Math.sin(sunLon) * r,
       -Math.sin(declRad) * r,
-      -(Math.cos(declRad) * Math.cos(sunLon)) * r
+      -Math.cos(declRad) * Math.cos(sunLon) * r
     );
   });
 
