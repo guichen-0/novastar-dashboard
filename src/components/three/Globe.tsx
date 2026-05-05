@@ -24,6 +24,7 @@ const fragmentShader = /* glsl */ `
   uniform sampler2D uNight;
   uniform float uSunLat;
   uniform float uSunLon;
+  uniform float uLonOffset;
 
   varying vec2 vUv;
 
@@ -31,8 +32,8 @@ const fragmentShader = /* glsl */ `
     vec4 dayColor = texture2D(uDay, vUv);
     vec4 nightColor = texture2D(uNight, vUv);
 
-    // Fragment lat/lon
-    float fragLon = (vUv.x - 0.5) * 6.2831853;
+    // Fragment lon: UV x=0 → -180°, x=0.5 → 0°, x=1 → +180°
+    float fragLon = (vUv.x - 0.5) * 6.2831853 + uLonOffset;
     float fragLat = (vUv.y - 0.5) * 3.1415927;
 
     // Angular distance to subsolar point
@@ -86,6 +87,7 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
       uNight: { value: nightMap },
       uSunLat: { value: 0 },
       uSunLon: { value: 0 },
+      uLonOffset: { value: 0 },
     }),
     [dayMap, nightMap]
   );
@@ -101,6 +103,7 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     if (matRef.current?.uniforms) {
       matRef.current.uniforms.uSunLat.value = (decl * Math.PI) / 180;
       matRef.current.uniforms.uSunLon.value = ((utcHours - 12) / 12) * Math.PI;
+      matRef.current.uniforms.uLonOffset.value = Math.PI;
     }
   });
 
