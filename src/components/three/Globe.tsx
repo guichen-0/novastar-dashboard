@@ -31,12 +31,13 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
     // DirectionalLight shines FROM its position TOWARD the scene origin.
-    // Place it at the sun's position so it illuminates the correct hemisphere.
+    // Negate sun direction so the light sits on the NIGHT side and shines
+    // toward the DAY side (illuminating the correct hemisphere).
     const r = 10;
     lightRef.current.position.set(
-      Math.cos(declRad) * Math.sin(sunLon) * r,
-      Math.sin(declRad) * r,
-      Math.cos(declRad) * Math.cos(sunLon) * r
+      -(Math.cos(declRad) * Math.sin(sunLon)) * r,
+      -Math.sin(declRad) * r,
+      -(Math.cos(declRad) * Math.cos(sunLon)) * r
     );
   });
 
