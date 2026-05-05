@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import CustomShaderMaterial from "three-custom-shader-material";
+import { SatelliteOrbits, type SatelliteOrbitsData } from "./SatelliteOrbits";
+import type { SatelliteData } from "@/lib/satellite";
 
 const EARTH_RADIUS = 1;
 const EARTH_SEGMENTS = 64;
@@ -73,7 +75,7 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-function GlobeScene() {
+function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
   const matRef = useRef<any>(null);
   const dayMap = useTexture("/earth-day.jpg");
   const nightMap = useTexture("/earth-night.jpg");
@@ -124,6 +126,9 @@ function GlobeScene() {
         <sphereGeometry args={[1.12, 32, 32]} />
         <meshBasicMaterial color="#0077B6" transparent opacity={0.03} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
       </mesh>
+      {satellites && satellites.length > 0 && (
+        <SatelliteOrbits satellites={satellites} />
+      )}
     </group>
   );
 }
@@ -139,7 +144,7 @@ function GlobeLoader() {
   );
 }
 
-export function Globe() {
+export function Globe({ satellites }: { satellites?: SatelliteData[] } = {}) {
   const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => {
@@ -162,7 +167,7 @@ export function Globe() {
       >
         <ambientLight intensity={0.3} />
         <pointLight position={[5, 3, 5]} intensity={0.8} />
-        <GlobeScene />
+        <GlobeScene satellites={satellites} />
         <OrbitControls
           enableZoom={false}
           enablePan={false}

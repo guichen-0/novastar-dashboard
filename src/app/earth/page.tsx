@@ -3,14 +3,14 @@
 import { Globe } from "@/components/three/Globe";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { StatsCard } from "@/components/ui/StatsCard";
+import useSWR from "swr";
 import {
-  Globe as GlobeIcon,
-  Satellite,
-  Activity,
-  Thermometer,
   Radio,
   Wifi,
 } from "lucide-react";
+import type { SatelliteData } from "@/lib/satellite";
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const dataStreams = [
   { label: "GitHub 贡献", value: "+2,341", color: "var(--cyan)" },
@@ -20,6 +20,21 @@ const dataStreams = [
 ];
 
 export default function EarthPage() {
+  const { data: satData } = useSWR<{ satellites: SatelliteData[] }>(
+    "/api/satellites?group=stations",
+    fetcher,
+    { refreshInterval: 300000 }
+  );
+
+  const satellites = satData?.satellites ?? [];
+
+  const orbitStats = [
+    { label: "LEO", count: satellites.filter((s) => s.orbitClass === "LEO").length, color: "#00E5FF" },
+    { label: "MEO", count: satellites.filter((s) => s.orbitClass === "MEO").length, color: "#8B5CF6" },
+    { label: "GEO", count: satellites.filter((s) => s.orbitClass === "GEO").length, color: "#FF0090" },
+    { label: "HEO", count: satellites.filter((s) => s.orbitClass === "HEO").length, color: "#F59E0B" },
+  ];
+
   return (
     <div className="p-6 h-full flex flex-col overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
@@ -34,17 +49,27 @@ export default function EarthPage() {
             全球数据互联网络 · 实时可视化
           </p>
         </div>
+        <div className="flex items-center gap-4">
+          {orbitStats.map((s) => (
+            <div key={s.label} className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+              <span className="text-[10px]" style={{ fontFamily: "var(--font-jetbrains)", color: "var(--text-muted)" }}>
+                {s.label} {s.count}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4 flex-1">
         {/* Globe - Full width */}
         <div className="col-span-12 relative overflow-hidden" style={{ height: 500 }}>
-          <Globe />
+          <Globe satellites={satellites} />
 
           {/* Floating Stats */}
           <div className="absolute top-4 right-4 flex flex-col gap-3">
-            <StatsCard label="全球节点" value="12,456" color="cyan" />
-            <StatsCard label="活跃连接" value="8,234" color="purple" />
+            <StatsCard label="在轨卫星" value={`${satellites.length}`} color="cyan" />
+            <StatsCard label="轨道类型" value={`${orbitStats.filter((s) => s.count > 0).length}`} color="purple" />
           </div>
           <div className="absolute bottom-4 left-4 flex flex-col gap-3">
             <StatsCard label="数据流" value="1.2 TB/s" color="magenta" />

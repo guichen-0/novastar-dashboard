@@ -2,26 +2,75 @@
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { GlassPanel } from "@/components/ui/GlassPanel";
+import useSWR from "swr";
 import { Sun, Zap, Radio, Thermometer } from "lucide-react";
 
-const solarEvents = [
-  { type: "M2.1 耀斑", time: "4小时前", source: "AR3842", severity: "中" },
-  { type: "日冕物质抛射", time: "8小时前", source: "AR3839", severity: "高" },
-  { type: "太阳高能粒子", time: "12小时前", source: "L1监测站", severity: "低" },
-];
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-const kpIndex = [
-  { hour: "00", value: 3 },
-  { hour: "03", value: 4 },
-  { hour: "06", value: 5 },
-  { hour: "09", value: 4 },
-  { hour: "12", value: 3 },
-  { hour: "15", value: 4 },
-  { hour: "18", value: 3 },
-  { hour: "21", value: 2 },
-];
+function getSeverity(kp: number): "高" | "中" | "低" {
+  if (kp >= 5) return "高";
+  if (kp >= 3) return "中";
+  return "低";
+}
+
+function getKpColor(kp: number): string {
+  if (kp >= 5) return "var(--error)";
+  if (kp >= 3) return "var(--warning)";
+  return "var(--success)";
+}
+
+function formatTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const hours = Math.floor(diff / 3600000);
+  if (hours < 1) return `${Math.floor(diff / 60000)}分钟前`;
+  if (hours < 24) return `${hours}小时前`;
+  return `${Math.floor(hours / 24)}天前`;
+}
 
 export default function SpaceWeatherPage() {
+  const { data: kpData, isLoading: kpLoading } = useSWR(
+    "/api/space-weather/kp",
+    fetcher,
+    { refreshInterval: 300000 }
+  );
+
+  const { data: windData, isLoading: windLoading } = useSWR(
+    "/api/space-weather/solar-wind",
+    fetcher,
+    { refreshInterval: 60000 }
+  );
+
+  const { data: xrayData, isLoading: xrayLoading } = useSWR(
+    "/api/space-weather/xray",
+    fetcher,
+    { refreshInterval: 60000 }
+  );
+
+  const { data: eventsData, isLoading: eventsLoading } = useSWR(
+    "/api/space-weather/events",
+    fetcher,
+    { refreshInterval: 600000 }
+  );
+
+  const kpEntries = kpData?.kp ?? [];
+  const solarWind = windData?.plasma ?? [];
+  const magData = windData?.mag ?? [];
+  const xrayEntries = xrayData?.xray ?? [];
+  const events = eventsData?.events ?? [];
+
+  const latestKp = kpEntries.length > 0 ? kpEntries[kpEntries.length - 1].kp_index : 0;
+  const latestWind = solarWind.length > 0 ? solarWind[solarWind.length - 1] : null;
+  const latestMag = magData.length > 0 ? magData[magData.length - 1] : null;
+
+  const latestXray = xrayEntries.length > 0 ? xrayEntries[xrayEntries.length - 1] : null;
+  const xrayFlux = latestXray ? parseFloat(latestXray.flux) : 0;
+  const radiationLevel = Math.min(xrayFlux * 1000, 10).toFixed(1);
+
+  const auroraProbNorth = Math.min(Math.round(latestKp * 15), 100);
+  const auroraProbSouth = Math.min(Math.round(latestKp * 10), 100);
+
+  const recentEvents = events.slice(0, 5);
+
   return (
     <div className="p-6 h-full flex flex-col overflow-y-auto">
       <PageHeader title="太空天气" subtitle="太阳活动与太空环境 · NOAA SWPC" />
@@ -36,47 +85,46 @@ export default function SpaceWeatherPage() {
                 <Sun size={16} className="text-[var(--cyan)]" />
                 地磁活动 Kp 指数
               </h3>
-              <span
-                className="text-xs font-bold text-[var(--warning)]"
-                style={{ fontFamily: "var(--font-orbitron)" }}
-              >
-                Kp: 4.2
-              </span>
+              {kpLoading ? (
+                <div className="h-4 w-16 bg-[rgba(255,255,255,0.05)] rounded animate-pulse" />
+              ) : (
+                <span
+                  className="text-xs font-bold"
+                  style={{ fontFamily: "var(--font-orbitron)", color: getKpColor(latestKp) }}
+                >
+                  Kp: {latestKp.toFixed(1)}
+                </span>
+              )}
             </div>
-            <div className="flex items-end gap-2 h-32">
-              {kpIndex.map((d) => (
-                <div key={d.hour} className="flex-1 flex flex-col items-center gap-1">
-                  <span
-                    className="text-[9px] text-[var(--text-muted)]"
-                    style={{ fontFamily: "var(--font-jetbrains)" }}
-                  >
-                    {d.value}
-                  </span>
-                  <div
-                    className="w-full rounded-t transition-all duration-300"
-                    style={{
-                      height: `${(d.value / 9) * 100}%`,
-                      background:
-                        d.value >= 5
-                          ? "var(--error)"
-                          : d.value >= 3
-                          ? "var(--warning)"
-                          : "var(--success)",
-                      boxShadow: `0 0 6px ${
-                        d.value >= 5
-                          ? "rgba(239,68,68,0.4)"
-                          : d.value >= 3
-                          ? "rgba(245,158,11,0.3)"
-                          : "rgba(34,197,94,0.3)"
-                      }`,
-                      minHeight: 4,
-                    }}
-                  />
-                  <span className="text-[9px] text-[var(--text-muted)]">{d.hour}</span>
-                </div>
-              ))}
+            <div className="flex items-end gap-1 h-32">
+              {kpLoading
+                ? Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div className="w-full bg-[rgba(255,255,255,0.05)] rounded-t animate-pulse" style={{ height: `${30 + Math.random() * 40}%` }} />
+                    </div>
+                  ))
+                : kpEntries.slice(-24).map((d: { time_tag: string; kp_index: number }, i: number) => {
+                    const time = new Date(d.time_tag);
+                    const label = `${String(time.getUTCHours()).padStart(2, "0")}`;
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <span className="text-[9px] text-[var(--text-muted)]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                          {d.kp_index}
+                        </span>
+                        <div
+                          className="w-full rounded-t transition-all duration-300"
+                          style={{
+                            height: `${(d.kp_index / 9) * 100}%`,
+                            background: getKpColor(d.kp_index),
+                            boxShadow: `0 0 6px ${d.kp_index >= 5 ? "rgba(239,68,68,0.4)" : d.kp_index >= 3 ? "rgba(245,158,11,0.3)" : "rgba(34,197,94,0.3)"}`,
+                            minHeight: 4,
+                          }}
+                        />
+                        <span className="text-[9px] text-[var(--text-muted)]">{label}</span>
+                      </div>
+                    );
+                  })}
             </div>
-            {/* Kp scale */}
             <div className="flex items-center gap-2 mt-3 text-[9px] text-[var(--text-muted)]">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-[var(--success)]" /> 低 (0-2)</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-[var(--warning)]" /> 中 (3-4)</span>
@@ -91,30 +139,42 @@ export default function SpaceWeatherPage() {
               太空天气事件
             </h3>
             <div className="space-y-3">
-              {solarEvents.map((event, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between py-3 border-b border-[rgba(255,255,255,0.03)] last:border-0"
-                >
-                  <div>
-                    <p className="text-xs text-[var(--text-primary)]">{event.type}</p>
-                    <div className="flex items-center gap-3 mt-1 text-[10px] text-[var(--text-muted)]">
-                      <span>{event.source}</span>
-                      <span>{event.time}</span>
-                    </div>
+              {eventsLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="py-3 border-b border-[rgba(255,255,255,0.03)] last:border-0">
+                    <div className="h-3 w-32 bg-[rgba(255,255,255,0.05)] rounded animate-pulse mb-2" />
+                    <div className="h-2 w-20 bg-[rgba(255,255,255,0.03)] rounded animate-pulse" />
                   </div>
-                  <span
-                    className="text-[10px] px-2 py-0.5 rounded"
-                    style={{
-                      color: event.severity === "高" ? "var(--error)" : event.severity === "中" ? "var(--warning)" : "var(--success)",
-                      background: event.severity === "高" ? "rgba(239,68,68,0.1)" : event.severity === "中" ? "rgba(245,158,11,0.1)" : "rgba(34,197,94,0.1)",
-                      fontFamily: "var(--font-jetbrains)",
-                    }}
-                  >
-                    {event.severity}
-                  </span>
-                </div>
-              ))}
+                ))
+              ) : recentEvents.length === 0 ? (
+                <p className="text-xs text-[var(--text-muted)] text-center py-4">暂无近期事件</p>
+              ) : (
+                recentEvents.map((event: any, i: number) => {
+                  const typeMap: Record<string, string> = {
+                    CME: "日冕物质抛射",
+                    FLR: "太阳耀斑",
+                    SEP: "太阳高能粒子",
+                    IPC: "行星际冲击波",
+                    GST: "地磁暴",
+                    "SSC": "太阳冲击波",
+                  };
+                  const typeName = typeMap[event.messageType] || event.messageType;
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between py-3 border-b border-[rgba(255,255,255,0.03)] last:border-0"
+                    >
+                      <div>
+                        <p className="text-xs text-[var(--text-primary)]">{typeName}</p>
+                        <div className="flex items-center gap-3 mt-1 text-[10px] text-[var(--text-muted)]">
+                          <span>{event.sourceLocation || "未知源"}</span>
+                          <span>{formatTimeAgo(event.eventTime)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </GlassPanel>
         </div>
@@ -128,27 +188,34 @@ export default function SpaceWeatherPage() {
               太阳风参数
             </h3>
             <div className="space-y-4">
-              {[
-                { label: "太阳风速度", value: "425", unit: "km/s", pct: 42 },
-                { label: "质子密度", value: "5.2", unit: "p/cm³", pct: 26 },
-                { label: "磁场强度", value: "6.8", unit: "nT", pct: 34 },
-                { label: "温度", value: "1.2×10⁵", unit: "K", pct: 60 },
-              ].map((param) => (
-                <div key={param.label}>
-                  <div className="flex justify-between text-[10px] mb-1">
-                    <span className="text-[var(--text-secondary)]">{param.label}</span>
-                    <span className="text-[var(--cyan)]" style={{ fontFamily: "var(--font-jetbrains)" }}>
-                      {param.value} {param.unit}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-[rgba(255,255,255,0.05)] rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-[var(--cyan)] to-[var(--magenta)] rounded-full"
-                      style={{ width: `${param.pct}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+              {windLoading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i}>
+                      <div className="h-2 w-20 bg-[rgba(255,255,255,0.05)] rounded animate-pulse mb-2" />
+                      <div className="h-1.5 bg-[rgba(255,255,255,0.05)] rounded-full" />
+                    </div>
+                  ))
+                : [
+                    { label: "太阳风速度", value: latestWind ? latestWind.speed.toFixed(0) : "--", unit: "km/s", pct: latestWind ? Math.min((latestWind.speed / 1000) * 100, 100) : 0 },
+                    { label: "质子密度", value: latestWind ? latestWind.density.toFixed(1) : "--", unit: "p/cm³", pct: latestWind ? Math.min((latestWind.density / 20) * 100, 100) : 0 },
+                    { label: "磁场强度 Bt", value: latestMag ? latestMag.bt.toFixed(1) : "--", unit: "nT", pct: latestMag ? Math.min((latestMag.bt / 20) * 100, 100) : 0 },
+                    { label: "磁场 Bz", value: latestMag ? latestMag.bz_gsm.toFixed(1) : "--", unit: "nT", pct: latestMag ? Math.min(Math.abs(latestMag.bz_gsm) / 10 * 100, 100) : 0 },
+                  ].map((param) => (
+                    <div key={param.label}>
+                      <div className="flex justify-between text-[10px] mb-1">
+                        <span className="text-[var(--text-secondary)]">{param.label}</span>
+                        <span className="text-[var(--cyan)]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                          {param.value} {param.unit}
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-[rgba(255,255,255,0.05)] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[var(--cyan)] to-[var(--magenta)] rounded-full transition-all duration-500"
+                          style={{ width: `${param.pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
             </div>
           </GlassPanel>
 
@@ -156,27 +223,43 @@ export default function SpaceWeatherPage() {
           <GlassPanel className="p-5">
             <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)] mb-3">
               <Radio size={16} className="text-[var(--purple)]" />
-              辐射水平
+              辐射水平 (X射线通量)
             </h3>
             <div className="flex items-center justify-center h-24">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full border-4 border-[rgba(255,255,255,0.05)] flex items-center justify-center">
                   <div className="text-center">
-                    <div
-                      className="text-xl font-bold text-[var(--success)]"
-                      style={{ fontFamily: "var(--font-orbitron)" }}
-                    >
-                      0.8
-                    </div>
-                    <div className="text-[9px] text-[var(--text-muted)]">mSv/h</div>
+                    {xrayLoading ? (
+                      <div className="h-6 w-12 bg-[rgba(255,255,255,0.05)] rounded animate-pulse mx-auto" />
+                    ) : (
+                      <div
+                        className="text-xl font-bold"
+                        style={{
+                          fontFamily: "var(--font-orbitron)",
+                          color: xrayFlux > 1e-4 ? "var(--error)" : xrayFlux > 1e-5 ? "var(--warning)" : "var(--success)",
+                        }}
+                      >
+                        {xrayFlux > 0 ? xrayFlux.toExponential(1) : "--"}
+                      </div>
+                    )}
+                    <div className="text-[9px] text-[var(--text-muted)]">W/m²</div>
                   </div>
                 </div>
                 <svg className="absolute inset-0 w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="44" fill="none" stroke="var(--success)" strokeWidth="4" strokeDasharray="276" strokeDashoffset="220" strokeLinecap="round" />
+                  <circle
+                    cx="48" cy="48" r="44" fill="none"
+                    stroke={xrayFlux > 1e-4 ? "var(--error)" : xrayFlux > 1e-5 ? "var(--warning)" : "var(--success)"}
+                    strokeWidth="4"
+                    strokeDasharray="276"
+                    strokeDashoffset={Math.max(276 - (xrayFlux / 1e-4) * 276, 0)}
+                    strokeLinecap="round"
+                  />
                 </svg>
               </div>
             </div>
-            <p className="text-center text-[10px] text-[var(--success)]">正常范围</p>
+            <p className="text-center text-[10px]" style={{ color: xrayFlux > 1e-4 ? "var(--error)" : "var(--success)" }}>
+              {xrayFlux > 1e-4 ? "X级耀斑" : xrayFlux > 1e-5 ? "M级耀斑" : xrayFlux > 1e-6 ? "C级耀斑" : "正常范围"}
+            </p>
           </GlassPanel>
 
           {/* Aurora Forecast */}
@@ -187,15 +270,21 @@ export default function SpaceWeatherPage() {
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
                 <span className="text-[var(--text-secondary)]">北极区域</span>
-                <span className="text-[var(--success)]">可见概率 65%</span>
+                <span style={{ color: auroraProbNorth > 50 ? "var(--success)" : auroraProbNorth > 20 ? "var(--warning)" : "var(--text-muted)" }}>
+                  可见概率 {auroraProbNorth}%
+                </span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-[var(--text-secondary)]">南极区域</span>
-                <span className="text-[var(--warning)]">可见概率 45%</span>
+                <span style={{ color: auroraProbSouth > 50 ? "var(--success)" : auroraProbSouth > 20 ? "var(--warning)" : "var(--text-muted)" }}>
+                  可见概率 {auroraProbSouth}%
+                </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-[var(--text-secondary)]">高纬度地区</span>
-                <span className="text-[var(--text-muted)]">不可见</span>
+                <span className="text-[var(--text-secondary)]">Kp 阈值</span>
+                <span className="text-[var(--text-muted)]">
+                  {latestKp >= 7 ? "全球可见" : latestKp >= 5 ? "高纬可见" : latestKp >= 3 ? "极区可见" : "不可见"}
+                </span>
               </div>
             </div>
           </GlassPanel>
