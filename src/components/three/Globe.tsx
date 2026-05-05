@@ -95,12 +95,13 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
     // Sun direction in Three.js world space.
-    // At UTC noon (sunLon=0): sun at 0° lon → need direction toward -Z axis.
-    // So z = +cos(dec)*cos(sunLon) which gives z=+1 at UTC noon → points to -Z
-    // (because the shader dot product convention: +z direction = toward -Z face).
-    const x = Math.cos(declRad) * Math.sin(sunLon);
+    // Three.js SphereGeometry UV: U=0.75(-Z)=0°, U=0(+X)=90°E, U=0.25(+Z)=180°, U=0.5(-X)=90°W
+    // At UTC noon (sunLon=0): sun at 0° lon → direction toward -Z → z=-1
+    // At 90°E (sunLon=π/2): direction toward +X → x=+1
+    // Formula: rotate (0, sin(dec), -cos(dec)) by sunLon around Y axis
+    const x = -Math.cos(declRad) * Math.sin(sunLon);
     const y = Math.sin(declRad);
-    const z = Math.cos(declRad) * Math.cos(sunLon);
+    const z = -Math.cos(declRad) * Math.cos(sunLon);
 
     matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
