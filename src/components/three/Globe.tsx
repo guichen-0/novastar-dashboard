@@ -31,30 +31,25 @@ const earthFragmentShader = /* glsl */ `
     vec4 dayColor = texture2D(uDay, vUv);
     vec4 nightColor = texture2D(uNight, vUv);
 
-    // Day/night factor from directional light
     float sunDot = dot(normalize(vWorldNormal), normalize(uSunDir));
-    float dayFactor = smoothstep(-0.2, 0.15, sunDot);
 
-    // City lights: extract from night texture
+    // Sharp terminator: narrow transition zone (~6°)
+    float dayFactor = smoothstep(-0.05, 0.08, sunDot);
+
+    // Night lights from VIIRS Black Marble data
     float nightLum = dot(nightColor.rgb, vec3(0.299, 0.587, 0.114));
-    float lightMask = smoothstep(0.03, 0.15, nightLum);
-    float gray = nightLum;
-    vec3 desaturated = mix(vec3(gray), nightColor.rgb, 0.7);
-    vec3 lights = desaturated * lightMask * 2.0;
+    vec3 lights = nightColor.rgb * smoothstep(0.02, 0.12, nightLum) * 1.8;
 
-    // Lights dimmer on day side, bright on night side
-    float lightIntensity = mix(1.0, 0.4, dayFactor);
-    lights *= lightIntensity;
+    // Base: day texture on day side, near-black on night side
+    vec3 base = mix(vec3(0.005, 0.005, 0.01), dayColor.rgb, dayFactor);
 
-    // Base: day texture on day side, dark on night side
-    vec3 base = mix(vec3(0.0), dayColor.rgb, dayFactor);
+    // Blend: lights show on night side, fade on day side
+    float nightFactor = 1.0 - dayFactor;
+    vec3 finalColor = base + lights * nightFactor;
 
-    // Overlay lights
-    vec3 finalColor = base + lights;
-
-    // Subtle terminator glow
-    float terminator = 1.0 - smoothstep(0.0, 0.35, abs(sunDot));
-    finalColor += vec3(0.05, 0.2, 0.35) * terminator * 0.12;
+    // Thin terminator glow (atmospheric scattering hint)
+    float terminator = 1.0 - smoothstep(0.0, 0.18, abs(sunDot));
+    finalColor += vec3(0.04, 0.15, 0.3) * terminator * 0.15;
 
     gl_FragColor = vec4(finalColor, 1.0);
   }
@@ -87,11 +82,9 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const declRad = (decl * Math.PI) / 180;
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
-    // Rotate sun direction by π around Y to align with Three.js UV mapping
-    // (Three.js UV x=0 is +X, but texture 0° lon is at -X)
-    const x = -(Math.cos(declRad) * Math.sin(sunLon));
+    const x = Math.cos(declRad) * Math.sin(sunLon);
     const y = Math.sin(declRad);
-    const z = -(Math.cos(declRad) * Math.cos(sunLon));
+    const z = Math.cos(declRad) * Math.cos(sunLon);
 
     matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
