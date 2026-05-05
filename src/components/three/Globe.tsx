@@ -29,14 +29,15 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const declRad = (decl * Math.PI) / 180;
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
-    // Three.js SphereGeometry: U=0.5 (0° lon) maps to -Z axis.
-    // So sun direction needs negative X and Z to align with geographic coordinates.
+    // DirectionalLight shines FROM its position TOWARD the scene origin.
+    // The sub-solar point formula gives direction FROM center TO sun.
+    // Negate it so light sits opposite and shines toward the sunlit hemisphere.
+    // Account for Three.js UV: U=0.5 (0° lon) is at -Z, not +Z.
     const r = 10;
-    lightRef.current.position.set(
-      Math.cos(declRad) * Math.sin(sunLon) * r,
-      -Math.sin(declRad) * r,
-      -Math.cos(declRad) * Math.cos(sunLon) * r
-    );
+    const sunX = -Math.cos(declRad) * Math.sin(sunLon);
+    const sunY = Math.sin(declRad);
+    const sunZ = -Math.cos(declRad) * Math.cos(sunLon);
+    lightRef.current.position.set(-sunX * r, -sunY * r, -sunZ * r);
   });
 
   if (!dayMap || !nightMap) return null;
@@ -113,7 +114,7 @@ export function Globe({ satellites }: { satellites?: SatelliteData[] } = {}) {
         gl={{ alpha: true, antialias: true }}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
       >
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.8} />
         <GlobeScene satellites={satellites} />
         <OrbitControls
           enableZoom={false}
