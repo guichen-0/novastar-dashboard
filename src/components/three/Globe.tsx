@@ -95,15 +95,14 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
     // Sun direction in Three.js world space.
-    // Three.js SphereGeometry UV has a 90° offset vs standard equirectangular textures:
-    //   UV U=0 → -X axis (90°W), U=0.5 → +X axis (90°E)
-    //   Standard texture: U=0 → -180°, U=0.5 → 0° (Prime Meridian)
-    // So we rotate the sun direction by -90° around Y to compensate:
-    //   x' = z, z' = -x
-    // Result: at UTC noon (sunLon=0), sun at 0° lon → x=+1 (toward +X = texture center)
-    const x = Math.cos(declRad) * Math.cos(sunLon);
+    // Three.js SphereGeometry UV mapping:
+    //   U=0 → -X (90°W), U=0.25 → +Z (180°), U=0.5 → +X (90°E), U=0.75 → -Z (0°)
+    // Standard equirectangular texture: U=0 → -180°, U=0.5 → 0°
+    // The 90° offset means: at UTC noon (sunLon=0), sun at 0° lon = -Z face.
+    // Direction toward -Z = (0, 0, -1). So z must be NEGATIVE.
+    const x = Math.cos(declRad) * Math.sin(sunLon);
     const y = Math.sin(declRad);
-    const z = -Math.cos(declRad) * Math.sin(sunLon);
+    const z = -(Math.cos(declRad) * Math.cos(sunLon));
 
     matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
