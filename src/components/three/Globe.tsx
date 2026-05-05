@@ -30,12 +30,13 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const declRad = (decl * Math.PI) / 180;
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
-    // DirectionalLight position = where light comes FROM (opposite of sun direction)
+    // DirectionalLight shines FROM its position TOWARD the scene origin.
+    // Place it at the sun's position so it illuminates the correct hemisphere.
     const r = 10;
     lightRef.current.position.set(
-      -(Math.cos(declRad) * Math.sin(sunLon)) * r,
-      -Math.sin(declRad) * r,
-      -(Math.cos(declRad) * Math.cos(sunLon)) * r
+      Math.cos(declRad) * Math.sin(sunLon) * r,
+      Math.sin(declRad) * r,
+      Math.cos(declRad) * Math.cos(sunLon) * r
     );
   });
 
@@ -57,8 +58,8 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
           ref={matRef}
           map={dayMap}
           emissiveMap={nightMap}
-          emissive={new THREE.Color(1.5, 1.5, 1.5)}
-          emissiveIntensity={1}
+          emissive={new THREE.Color(2, 2, 2)}
+          emissiveIntensity={0.8}
           roughness={1}
           metalness={0}
         />
@@ -113,7 +114,7 @@ export function Globe({ satellites }: { satellites?: SatelliteData[] } = {}) {
         gl={{ alpha: true, antialias: true }}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
       >
-        <ambientLight intensity={0.3} />
+        <ambientLight intensity={0.5} />
         <GlobeScene satellites={satellites} />
         <OrbitControls
           enableZoom={false}
