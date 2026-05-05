@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useRef, useMemo, useEffect, useState } from "react";
+import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import {
   computeOrbitPath,
+  computeCurrentPosition,
   latLngAltToEcef,
   type SatelliteData,
 } from "@/lib/satellite";
@@ -69,11 +70,9 @@ function SatelliteMarker({ sat }: SatelliteMarkerProps) {
   useFrame(() => {
     if (!meshRef.current) return;
 
-    const now = new Date();
-    const orbitPoints = computeOrbitPath(sat.tleLine1, sat.tleLine2, 1);
-    if (orbitPoints.length === 0) return;
+    const p = computeCurrentPosition(sat.tleLine1, sat.tleLine2);
+    if (!p) return;
 
-    const p = orbitPoints[0];
     const pos = latLngAltToEcef(p.lat, p.lng, p.alt);
     meshRef.current.position.set(pos.x, pos.y, pos.z);
 
@@ -108,26 +107,15 @@ export interface SatelliteOrbitsData {
 }
 
 export function SatelliteOrbits({ satellites }: SatelliteOrbitsData) {
-  const [showOrbits, setShowOrbits] = useState(true);
-
-  const orbitClassCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const sat of satellites) {
-      counts[sat.orbitClass] = (counts[sat.orbitClass] || 0) + 1;
-    }
-    return counts;
-  }, [satellites]);
-
   return (
     <group>
-      {showOrbits &&
-        satellites.map((sat) => (
-          <SatelliteOrbitLine
-            key={`orbit-${sat.noradId}`}
-            sat={sat}
-            visible={showOrbits}
-          />
-        ))}
+      {satellites.map((sat) => (
+        <SatelliteOrbitLine
+          key={`orbit-${sat.noradId}`}
+          sat={sat}
+          visible={true}
+        />
+      ))}
       {satellites.map((sat) => (
         <SatelliteMarker key={`sat-${sat.noradId}`} sat={sat} />
       ))}

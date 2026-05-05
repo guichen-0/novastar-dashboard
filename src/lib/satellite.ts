@@ -60,14 +60,16 @@ function propagateSatellite(
   date: Date
 ): { position: satellite.EciVec3<number>; velocity: satellite.EciVec3<number> } | null {
   const result = satellite.propagate(satrec, date);
-  if (typeof result === "boolean" || !result.position) return null;
 
-  const position = result.position as satellite.EciVec3<number>;
-  const velocity = result.velocity as satellite.EciVec3<number>;
+  if (!result || typeof result === "boolean") return null;
 
-  if (!velocity) return null;
+  const pos = result.position as satellite.EciVec3<number> | false | undefined;
+  const vel = result.velocity as satellite.EciVec3<number> | false | undefined;
 
-  return { position, velocity };
+  if (!pos || typeof pos !== "object" || !vel || typeof vel !== "object") return null;
+  if (typeof pos.x !== "number" || typeof pos.y !== "number" || typeof pos.z !== "number") return null;
+
+  return { position: pos, velocity: vel };
 }
 
 export function computePositions(
@@ -132,10 +134,13 @@ export function computeOrbitPath(
   sampleCount: number = 128
 ): OrbitPoint[] {
   const satrec = satellite.twoline2satrec(line1, line2);
-  const period = (2 * Math.PI) / satrec.no * 1440;
-  const now = new Date();
-  const gmst = satellite.gstime(now);
 
+  if (satrec.error > 0) return [];
+
+  const period = (2 * Math.PI) / satrec.no * 1440;
+  if (!isFinite(period) || period <= 0) return [];
+
+  const now = new Date();
   const points: OrbitPoint[] = [];
 
   for (let i = 0; i <= sampleCount; i++) {
@@ -152,6 +157,25 @@ export function computeOrbitPath(
   }
 
   return points;
+}
+
+export function computeCurrentPosition(
+  line1: string,
+  line2: string
+): OrbitPoint | null {
+  const satrec = satellite.twoline2satrec(line1, line2);
+  if (satrec.error > 0) return null;
+
+  const now = new Date();
+  const result = propagateSatellite(satrec, now);
+  if (!result) return null;
+
+  const geodetic = satellite.eciToGeodetic(result.position, satellite.gstime(now));
+  return {
+    lat: satellite.radiansToDegrees(geodetic.latitude),
+    lng: satellite.radiansToDegrees(geodetic.longitude),
+    alt: geodetic.height,
+  };
 }
 
 export function latLngAltToEcef(
