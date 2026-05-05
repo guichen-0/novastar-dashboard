@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -10,14 +10,79 @@ import type { SatelliteData } from "@/lib/satellite";
 const EARTH_RADIUS = 1;
 const EARTH_SEGMENTS = 64;
 
+// Three.js SphereGeometry UV mapping:
+//   U=0   → -X axis (90°W)
+//   U=0.25 → +Z axis (180°)
+//   U=0.5 → +X axis (90°E)
+//   U=0.75 → -Z axis (0° Prime Meridian)
+// So to get a sun direction pointing at geographic longitude L:
+//   x = cos(dec) * sin(L_rad)
+//   y = sin(dec)
+//   z = cos(dec) * cos(L_rad)
+// And the shader's dot(normal, sunDir) > 0 means daylight.
+
+const earthVertexShader = /* glsl */ `
+  varying vec2 vUv;
+  varying vec3 vWorldNormal;
+  void main() {
+    vUv = uv;
+    vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const earthFragmentShader = /* glsl */ `
+  uniform sampler2D uDay;
+  uniform sampler2D uNight;
+  uniform vec3 uSunDir;
+  varying vec2 vUv;
+  varying vec3 vWorldNormal;
+
+  void main() {
+    vec4 dayColor = texture2D(uDay, vUv);
+    vec4 nightColor = texture2D(uNight, vUv);
+
+    float sunDot = dot(normalize(vWorldNormal), normalize(uSunDir));
+
+    // Day/night blend
+    float dayFactor = smoothstep(-0.1, 0.15, sunDot);
+
+    // City lights from night texture
+    float nightLum = dot(nightColor.rgb, vec3(0.299, 0.587, 0.114));
+    vec3 lights = nightColor.rgb * smoothstep(0.02, 0.12, nightLum) * 1.5;
+
+    // Base: day on sunlit side, dark on night side
+    vec3 base = mix(vec3(0.005, 0.005, 0.01), dayColor.rgb, dayFactor);
+
+    // Blend lights on night side only
+    float nightFactor = 1.0 - dayFactor;
+    vec3 finalColor = base + lights * nightFactor;
+
+    // Subtle terminator glow
+    float terminator = 1.0 - smoothstep(0.0, 0.2, abs(sunDot));
+    finalColor += vec3(0.04, 0.15, 0.3) * terminator * 0.1;
+
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+`;
+
+
 function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
-  const matRef = useRef<THREE.MeshStandardMaterial>(null);
-  const lightRef = useRef<THREE.DirectionalLight>(null);
+  const matRef = useRef<THREE.ShaderMaterial>(null);
   const dayMap = useTexture("/earth-day.jpg");
   const nightMap = useTexture("/earth-night.jpg");
 
+  const uniforms = useMemo(
+    () => ({
+      uDay: { value: dayMap },
+      uNight: { value: nightMap },
+      uSunDir: { value: new THREE.Vector3(1, 0, 0) },
+    }),
+    [dayMap, nightMap]
+  );
+
   useFrame(() => {
-    if (!lightRef.current) return;
+    if (!matRef.current) return;
 
     const now = new Date();
     const dayOfYear = Math.floor(
@@ -29,39 +94,28 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const declRad = (decl * Math.PI) / 180;
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
-    // DirectionalLight shines FROM its position TOWARD the scene origin.
-    // The sub-solar point formula gives direction FROM center TO sun.
-    // Negate it so light sits opposite and shines toward the sunlit hemisphere.
-    // Account for Three.js UV: U=0.5 (0° lon) is at -Z, not +Z.
-    const r = 10;
-    const sunX = -Math.cos(declRad) * Math.sin(sunLon);
-    const sunY = Math.sin(declRad);
-    const sunZ = -Math.cos(declRad) * Math.cos(sunLon);
-    lightRef.current.position.set(-sunX * r, -sunY * r, -sunZ * r);
+    // Direction toward the sun in Three.js world space.
+    // U=0.5 (90°E) = +X, U=0.75 (0°) = -Z.
+    // At UTC noon sunLon=0 → sun at 0° lon → direction should point at -Z.
+    // cos(0)*cos(0)=1 for z, but -Z needs negative z → use -cos for z.
+    const x = Math.cos(declRad) * Math.sin(sunLon);
+    const y = Math.sin(declRad);
+    const z = -(Math.cos(declRad) * Math.cos(sunLon));
+
+    matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
 
   if (!dayMap || !nightMap) return null;
 
   return (
     <group>
-      {/* Sun light */}
-      <directionalLight
-        ref={lightRef}
-        intensity={2.5}
-        color="#ffffff"
-      />
-
-      {/* Earth sphere with day texture + night city lights as emissive */}
       <mesh>
         <sphereGeometry args={[EARTH_RADIUS, EARTH_SEGMENTS, EARTH_SEGMENTS]} />
-        <meshStandardMaterial
+        <shaderMaterial
           ref={matRef}
-          map={dayMap}
-          emissiveMap={nightMap}
-          emissive={new THREE.Color(2, 2, 2)}
-          emissiveIntensity={0.8}
-          roughness={1}
-          metalness={0}
+          vertexShader={earthVertexShader}
+          fragmentShader={earthFragmentShader}
+          uniforms={uniforms}
         />
       </mesh>
 
@@ -114,7 +168,7 @@ export function Globe({ satellites }: { satellites?: SatelliteData[] } = {}) {
         gl={{ alpha: true, antialias: true }}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
       >
-        <ambientLight intensity={0.8} />
+        <ambientLight intensity={0.3} />
         <GlobeScene satellites={satellites} />
         <OrbitControls
           enableZoom={false}
