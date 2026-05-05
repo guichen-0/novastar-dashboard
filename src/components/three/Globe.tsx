@@ -4,7 +4,6 @@ import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import SunCalc from "suncalc";
 import { SatelliteOrbits } from "./SatelliteOrbits";
 import type { SatelliteData } from "@/lib/satellite";
 
@@ -74,20 +73,26 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
   useFrame(() => {
     if (!matRef.current) return;
 
-    // Use SunCalc for precise astronomical sun position
+    // Compute sub-solar point direction in world space.
+    // declRad: solar declination (seasonal tilt, ±23.44°)
+    // sunLon: hour angle based on UTC (sunLon=0 at UTC noon)
+    // The resulting vector points FROM Earth's center TO the sub-solar point,
+    // giving dot(surfaceNormal, sunDir) > 0 on the day side.
     const now = new Date();
-    const sunPos = SunCalc.getPosition(now, 0, 0);
+    const dayOfYear = Math.floor(
+      (now.getTime() - new Date(Date.UTC(now.getUTCFullYear(), 0, 0)).getTime()) / 86400000
+    );
+    const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
 
-    // Convert SunCalc altitude/azimuth to Three.js world direction
-    // SunCalc: altitude from horizon, azimuth from south
-    // Three.js spherical: phi from +Y, theta from +Z
-    const r = 10;
-    const phi = Math.PI / 2 - sunPos.altitude;
-    const theta = sunPos.azimuth + Math.PI;
+    const decl = 23.44 * Math.sin(((360 / 365) * (dayOfYear - 81) * Math.PI) / 180);
+    const declRad = (decl * Math.PI) / 180;
+    const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
-    const x = r * Math.sin(phi) * Math.sin(theta);
-    const y = r * Math.cos(phi);
-    const z = r * Math.sin(phi) * Math.cos(theta);
+    // Negate: formula gives direction from center to sub-solar point.
+    // Shader needs direction toward sun (dot > 0 = day).
+    const x = -(Math.cos(declRad) * Math.sin(sunLon));
+    const y = -(Math.sin(declRad));
+    const z = -(Math.cos(declRad) * Math.cos(sunLon));
 
     matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
