@@ -46,15 +46,24 @@ const fragmentShader = /* glsl */ `
     // Day factor: 1 = full day, 0 = full night
     float dayFactor = smoothstep(1.8, 1.2, dist);
 
-    // Night side: BLACK base, only show bright spots (city lights)
+    // City lights: extract from night texture, visible GLOBALLY
     float nightLum = dot(nightColor.rgb, vec3(0.299, 0.587, 0.114));
-    // Hard threshold: only pixels above brightness threshold are "lights"
     float lightMask = smoothstep(0.03, 0.15, nightLum);
-    vec3 nightFinal = nightColor.rgb * lightMask * 3.0;
-    // Keep lights warm/golden, not blue
-    nightFinal = mix(nightFinal, nightFinal * vec3(1.2, 0.9, 0.5), 0.3);
+    // Slightly desaturate night texture
+    float gray = nightLum;
+    vec3 desaturated = mix(vec3(gray), nightColor.rgb, 0.7);
+    vec3 lights = desaturated * lightMask * 2.0;
 
-    vec3 finalColor = mix(nightFinal, dayColor.rgb, dayFactor);
+    // Day side: lights are dimmer (overpowered by sunlight)
+    // Night side: lights are bright
+    float lightIntensity = mix(1.0, 0.5, dayFactor);
+    lights *= lightIntensity;
+
+    // Base: day texture on day side, dark on night side
+    vec3 base = mix(vec3(0.0), dayColor.rgb, dayFactor);
+
+    // Overlay lights on top of base
+    vec3 finalColor = base + lights;
 
     // Subtle terminator glow
     float terminator = 1.0 - smoothstep(0.0, 0.4, abs(dist - 1.5707963));
