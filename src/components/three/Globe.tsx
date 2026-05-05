@@ -87,9 +87,11 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const declRad = (decl * Math.PI) / 180;
     const sunLon = ((utcHours - 12) / 12) * Math.PI;
 
-    const x = Math.cos(declRad) * Math.sin(sunLon);
+    // Rotate sun direction by π around Y to align with Three.js UV mapping
+    // (Three.js UV x=0 is +X, but texture 0° lon is at -X)
+    const x = -(Math.cos(declRad) * Math.sin(sunLon));
     const y = Math.sin(declRad);
-    const z = Math.cos(declRad) * Math.cos(sunLon);
+    const z = -(Math.cos(declRad) * Math.cos(sunLon));
 
     matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
