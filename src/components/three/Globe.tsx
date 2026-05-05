@@ -10,7 +10,7 @@ import type { SatelliteData } from "@/lib/satellite";
 const EARTH_RADIUS = 1;
 const EARTH_SEGMENTS = 64;
 
-const nightVertexShader = /* glsl */ `
+const earthVertexShader = /* glsl */ `
   varying vec2 vUv;
   varying vec3 vWorldNormal;
   void main() {
@@ -20,79 +20,63 @@ const nightVertexShader = /* glsl */ `
   }
 `;
 
-const nightFragmentShader = /* glsl */ `
+const earthFragmentShader = /* glsl */ `
+  uniform sampler2D uDay;
   uniform sampler2D uNight;
   uniform vec3 uSunDir;
   varying vec2 vUv;
   varying vec3 vWorldNormal;
 
   void main() {
+    vec4 dayColor = texture2D(uDay, vUv);
     vec4 nightColor = texture2D(uNight, vUv);
 
     // Day/night factor from directional light
     float sunDot = dot(normalize(vWorldNormal), normalize(uSunDir));
-    float nightFactor = smoothstep(0.1, -0.3, sunDot);
+    float dayFactor = smoothstep(-0.2, 0.15, sunDot);
 
-    // Extract bright city lights from night texture
+    // City lights: extract from night texture
     float nightLum = dot(nightColor.rgb, vec3(0.299, 0.587, 0.114));
     float lightMask = smoothstep(0.03, 0.15, nightLum);
-
-    // Desaturate and boost
     float gray = nightLum;
     vec3 desaturated = mix(vec3(gray), nightColor.rgb, 0.7);
-    vec3 lights = desaturated * lightMask * 2.5;
+    vec3 lights = desaturated * lightMask * 2.0;
 
-    // Only show on night side
-    lights *= nightFactor;
+    // Lights dimmer on day side, bright on night side
+    float lightIntensity = mix(1.0, 0.4, dayFactor);
+    lights *= lightIntensity;
 
-    gl_FragColor = vec4(lights, 1.0);
+    // Base: day texture on day side, dark on night side
+    vec3 base = mix(vec3(0.0), dayColor.rgb, dayFactor);
+
+    // Overlay lights
+    vec3 finalColor = base + lights;
+
+    // Subtle terminator glow
+    float terminator = 1.0 - smoothstep(0.0, 0.35, abs(sunDot));
+    finalColor += vec3(0.05, 0.2, 0.35) * terminator * 0.12;
+
+    gl_FragColor = vec4(finalColor, 1.0);
   }
 `;
 
-function SunLight() {
-  const lightRef = useRef<THREE.DirectionalLight>(null);
-
-  useFrame(() => {
-    if (!lightRef.current) return;
-
-    const now = new Date();
-    const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 0));
-    const dayOfYear = Math.floor((now.getTime() - start.getTime()) / 86400000);
-    const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
-
-    // Solar declination
-    const decl = 23.44 * Math.sin(((360 / 365) * (dayOfYear - 81) * Math.PI) / 180);
-    const declRad = (decl * Math.PI) / 180;
-
-    // Subsolar longitude
-    const sunLon = ((utcHours - 12) / 12) * Math.PI;
-
-    // Convert to Cartesian (sun direction in world space)
-    const x = Math.cos(declRad) * Math.sin(sunLon);
-    const y = Math.sin(declRad);
-    const z = Math.cos(declRad) * Math.cos(sunLon);
-
-    lightRef.current.position.set(x * 10, y * 10, z * 10);
-  });
-
-  return <directionalLight ref={lightRef} intensity={2.0} color="#ffffff" />;
-}
 
 function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
-  const nightMatRef = useRef<THREE.ShaderMaterial>(null);
+  const matRef = useRef<THREE.ShaderMaterial>(null);
   const dayMap = useTexture("/earth-day.jpg");
   const nightMap = useTexture("/earth-night.jpg");
 
-  const nightUniforms = useMemo(
+  const uniforms = useMemo(
     () => ({
+      uDay: { value: dayMap },
       uNight: { value: nightMap },
       uSunDir: { value: new THREE.Vector3(1, 0, 0) },
     }),
-    [nightMap]
+    [dayMap, nightMap]
   );
 
   useFrame(() => {
-    if (!nightMatRef.current) return;
+    if (!matRef.current) return;
 
     const now = new Date();
     const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 0));
@@ -107,34 +91,20 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     const y = Math.sin(declRad);
     const z = Math.cos(declRad) * Math.cos(sunLon);
 
-    nightMatRef.current.uniforms.uSunDir.value.set(x, y, z);
+    matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
 
   if (!dayMap || !nightMap) return null;
 
   return (
     <group>
-      {/* Day side: lit by DirectionalLight */}
       <mesh>
         <sphereGeometry args={[EARTH_RADIUS, EARTH_SEGMENTS, EARTH_SEGMENTS]} />
-        <meshStandardMaterial
-          map={dayMap}
-          roughness={1}
-          metalness={0}
-        />
-      </mesh>
-
-      {/* Night side: additive city lights (shader masks to dark side) */}
-      <mesh>
-        <sphereGeometry args={[EARTH_RADIUS + 0.001, EARTH_SEGMENTS, EARTH_SEGMENTS]} />
         <shaderMaterial
-          ref={nightMatRef}
-          vertexShader={nightVertexShader}
-          fragmentShader={nightFragmentShader}
-          uniforms={nightUniforms}
-          transparent
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
+          ref={matRef}
+          vertexShader={earthVertexShader}
+          fragmentShader={earthFragmentShader}
+          uniforms={uniforms}
         />
       </mesh>
 
@@ -187,8 +157,7 @@ export function Globe({ satellites }: { satellites?: SatelliteData[] } = {}) {
         gl={{ alpha: true, antialias: true }}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
       >
-        <ambientLight intensity={0.08} />
-        <SunLight />
+        <ambientLight intensity={0.3} />
         <GlobeScene satellites={satellites} />
         <OrbitControls
           enableZoom={false}
