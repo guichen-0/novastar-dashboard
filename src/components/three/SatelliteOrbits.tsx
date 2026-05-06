@@ -2,6 +2,7 @@
 
 import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import { Line } from "@react-three/drei";
 import * as THREE from "three";
 import {
   computeOrbitPath,
@@ -18,6 +19,7 @@ const ORBIT_COLORS: Record<SatelliteData["orbitClass"], string> = {
 };
 
 const SAMPLE_COUNT = 128;
+const MAX_VISIBLE_ORBITS = 8;
 
 interface SatelliteOrbitLineProps {
   sat: SatelliteData;
@@ -25,37 +27,39 @@ interface SatelliteOrbitLineProps {
 }
 
 function SatelliteOrbitLine({ sat, visible }: SatelliteOrbitLineProps) {
-  const lineRef = useRef<THREE.Line>(null);
-
-  const geometry = useMemo(() => {
-    const points: THREE.Vector3[] = [];
+  const points = useMemo(() => {
     const orbitPoints = computeOrbitPath(sat.tleLine1, sat.tleLine2, SAMPLE_COUNT);
-
-    for (const p of orbitPoints) {
-      const pos = latLngAltToEcef(p.lat, p.lng, p.alt);
-      points.push(new THREE.Vector3(pos.x, pos.y, pos.z));
-    }
-
-    if (points.length < 2) return null;
-
-    const geo = new THREE.BufferGeometry().setFromPoints(points);
-    return geo;
+    if (orbitPoints.length < 2) return null;
+    return orbitPoints.map((p): [number, number, number] => [p.x, p.y, p.z]);
   }, [sat.tleLine1, sat.tleLine2]);
 
-  if (!geometry || !visible) return null;
+  if (!points || !visible) return null;
+
+  const color = ORBIT_COLORS[sat.orbitClass];
 
   return (
-    <primitive
-      object={new THREE.Line(
-        geometry,
-        new THREE.LineBasicMaterial({
-          color: ORBIT_COLORS[sat.orbitClass],
-          transparent: true,
-          opacity: 0.25,
-        })
-      )}
-      ref={lineRef}
-    />
+    <group>
+      {/* Back half: visible through globe, low opacity */}
+      <Line
+        points={points}
+        color={color}
+        lineWidth={1.5}
+        transparent
+        opacity={0.15}
+        depthTest={false}
+        depthWrite={false}
+      />
+      {/* Front half: fully visible */}
+      <Line
+        points={points}
+        color={color}
+        lineWidth={1.5}
+        transparent
+        opacity={0.6}
+        depthTest={true}
+        depthWrite={false}
+      />
+    </group>
   );
 }
 
@@ -86,11 +90,11 @@ function SatelliteMarker({ sat }: SatelliteMarkerProps) {
   return (
     <group>
       <mesh ref={meshRef}>
-        <sphereGeometry args={[0.008, 8, 8]} />
+        <sphereGeometry args={[0.006, 8, 8]} />
         <meshBasicMaterial color={color} />
       </mesh>
       <mesh ref={glowRef}>
-        <sphereGeometry args={[0.015, 8, 8]} />
+        <sphereGeometry args={[0.012, 8, 8]} />
         <meshBasicMaterial
           color={color}
           transparent
@@ -107,16 +111,41 @@ export interface SatelliteOrbitsData {
 }
 
 export function SatelliteOrbits({ satellites }: SatelliteOrbitsData) {
+  const visibleSats = useMemo(() => {
+    if (satellites.length <= MAX_VISIBLE_ORBITS) return satellites;
+
+    // Distribute evenly across orbit classes, then by altitude
+    const byClass = new Map<string, SatelliteData[]>();
+    for (const sat of satellites) {
+      const list = byClass.get(sat.orbitClass) ?? [];
+      list.push(sat);
+      byClass.set(sat.orbitClass, list);
+    }
+
+    const picked: SatelliteData[] = [];
+    const perClass = Math.ceil(MAX_VISIBLE_ORBITS / byClass.size);
+
+    for (const [, sats] of byClass) {
+      sats.sort((a, b) => a.altitude - b.altitude);
+      const step = Math.max(1, Math.floor(sats.length / perClass));
+      for (let i = 0; i < sats.length && picked.length < MAX_VISIBLE_ORBITS; i += step) {
+        picked.push(sats[i]);
+      }
+    }
+
+    return picked;
+  }, [satellites]);
+
   return (
     <group>
-      {satellites.map((sat) => (
+      {visibleSats.map((sat) => (
         <SatelliteOrbitLine
           key={`orbit-${sat.noradId}`}
           sat={sat}
           visible={true}
         />
       ))}
-      {satellites.map((sat) => (
+      {visibleSats.map((sat) => (
         <SatelliteMarker key={`sat-${sat.noradId}`} sat={sat} />
       ))}
     </group>

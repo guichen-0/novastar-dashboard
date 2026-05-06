@@ -5,7 +5,7 @@ import {
   type SatelliteData,
 } from "@/lib/satellite";
 
-const SATELLITE_GROUPS = ["stations", "visual", "active"];
+const SATELLITE_GROUPS = ["stations", "visual", "starlink"];
 
 export const dynamic = "force-dynamic";
 

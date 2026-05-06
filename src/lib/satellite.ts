@@ -20,6 +20,12 @@ export interface OrbitPoint {
   alt: number;
 }
 
+export interface EcefPoint {
+  x: number;
+  y: number;
+  z: number;
+}
+
 const CELESTRAK_BASE = "https://celestrak.org/NORAD/elements/gp.php";
 
 const CACHE = new Map<string, { data: unknown; timestamp: number }>();
@@ -128,32 +134,75 @@ export function computePositions(
   return satellites;
 }
 
+function eciToEcef(
+  pos: satellite.EciVec3<number>,
+  gmst: number
+): { x: number; y: number; z: number } {
+  const cosG = Math.cos(gmst);
+  const sinG = Math.sin(gmst);
+  return {
+    x: cosG * pos.x + sinG * pos.y,
+    y: -sinG * pos.x + cosG * pos.y,
+    z: pos.z,
+  };
+}
+
 export function computeOrbitPath(
   line1: string,
   line2: string,
   sampleCount: number = 128
-): OrbitPoint[] {
+): EcefPoint[] {
   const satrec = satellite.twoline2satrec(line1, line2);
 
   if (satrec.error > 0) return [];
 
-  const period = (2 * Math.PI) / satrec.no * 1440;
+  const period = (2 * Math.PI) / satrec.no;
   if (!isFinite(period) || period <= 0) return [];
 
   const now = new Date();
-  const points: OrbitPoint[] = [];
+  const gmst = satellite.gstime(now);
+  const scale = 1 / EARTH_RADIUS_KM;
+
+  // Propagate all samples and convert to ECEF at a single reference time (now).
+  // Using the same GMST for every point ensures the orbit closes properly.
+  const rawPoints: (EcefPoint | null)[] = [];
 
   for (let i = 0; i <= sampleCount; i++) {
     const t = new Date(now.getTime() + (i / sampleCount) * period * 60 * 1000);
     const result = propagateSatellite(satrec, t);
-    if (!result) continue;
+    if (!result) {
+      rawPoints.push(null);
+      continue;
+    }
 
-    const geodetic = satellite.eciToGeodetic(result.position, satellite.gstime(t));
-    points.push({
-      lat: satellite.radiansToDegrees(geodetic.latitude),
-      lng: satellite.radiansToDegrees(geodetic.longitude),
-      alt: geodetic.height,
+    const ecef = eciToEcef(result.position, gmst);
+
+    rawPoints.push({
+      x: ecef.x * scale,
+      y: ecef.z * scale,
+      z: -ecef.y * scale,
     });
+  }
+
+  // Fill gaps by interpolating between valid neighbors
+  const points: EcefPoint[] = [];
+  for (let i = 0; i < rawPoints.length; i++) {
+    if (rawPoints[i]) {
+      points.push(rawPoints[i]!);
+      continue;
+    }
+    let prev = -1, next = -1;
+    for (let j = i - 1; j >= 0; j--) { if (rawPoints[j]) { prev = j; break; } }
+    for (let j = i + 1; j < rawPoints.length; j++) { if (rawPoints[j]) { next = j; break; } }
+    if (prev >= 0 && next >= 0) {
+      const t = (i - prev) / (next - prev);
+      const a = rawPoints[prev]!, b = rawPoints[next]!;
+      points.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t });
+    } else if (prev >= 0) {
+      points.push(rawPoints[prev]!);
+    } else if (next >= 0) {
+      points.push(rawPoints[next]!);
+    }
   }
 
   return points;
