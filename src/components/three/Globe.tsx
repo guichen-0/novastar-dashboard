@@ -47,7 +47,7 @@ const earthFragmentShader = /* glsl */ `
 
     // City lights from night texture
     float nightLum = dot(nightColor.rgb, vec3(0.299, 0.587, 0.114));
-    vec3 lights = nightColor.rgb * smoothstep(0.02, 0.12, nightLum) * 1.5;
+    vec3 lights = nightColor.rgb * smoothstep(0.01, 0.10, nightLum) * 2.5;
 
     // Base: day on sunlit side, dark on night side
     vec3 base = mix(vec3(0.005, 0.005, 0.01), dayColor.rgb, dayFactor);
@@ -99,7 +99,10 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
     // Subsolar longitude: RA - GMST (sun's hour angle at Greenwich)
     const gmstDeg = 280.16 + 360.9856235 * d;
     const ra = Math.atan2(Math.sin(L) * Math.cos(e), Math.cos(L));
-    const sunLonRad = ra - ((gmstDeg * Math.PI) / 180);
+
+    // Normalize subsolar longitude to [-PI, PI]
+    const rawSunLon = ra - ((gmstDeg * Math.PI) / 180);
+    const sunLonRad = ((rawSunLon % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 
     // Three.js world-space direction (SphereGeometry UV convention)
     const x = Math.cos(decl) * Math.cos(sunLonRad);
