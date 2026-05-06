@@ -4,22 +4,20 @@ import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
+import SunCalc from "suncalc";
 import { SatelliteOrbits } from "./SatelliteOrbits";
 import type { SatelliteData } from "@/lib/satellite";
 
 const EARTH_RADIUS = 1;
 const EARTH_SEGMENTS = 64;
 
-// Three.js SphereGeometry UV mapping:
-//   U=0   → -X axis (90°W)
-//   U=0.25 → +Z axis (180°)
-//   U=0.5 → +X axis (90°E)
-//   U=0.75 → -Z axis (0° Prime Meridian)
-// So to get a sun direction pointing at geographic longitude L:
-//   x = cos(dec) * sin(L_rad)
-//   y = sin(dec)
-//   z = cos(dec) * cos(L_rad)
-// And the shader's dot(normal, sunDir) > 0 means daylight.
+// Three.js SphereGeometry UV mapping (default params, equator):
+//   U=0   → -X axis (texture lon=-180°)
+//   U=0.5 → +X axis (texture lon=0° Prime Meridian)
+//   U=0.75 → -Z axis (texture lon=+90°E)
+// Surface normal at geographic (lat, lon) in world space:
+//   (cos(lat)*cos(lon), sin(lat), -cos(lat)*sin(lon))
+// Shader's dot(normal, sunDir) > 0 means daylight.
 
 const earthVertexShader = /* glsl */ `
   varying vec2 vUv;
@@ -84,26 +82,29 @@ function GlobeScene({ satellites }: { satellites?: SatelliteData[] }) {
   useFrame(() => {
     if (!matRef.current) return;
 
+    // Sun direction via SunCalc's astronomical algorithm (Equation of Time, nutation, etc.)
     const now = new Date();
-    const dayOfYear = Math.floor(
-      (now.getTime() - new Date(Date.UTC(now.getUTCFullYear(), 0, 0)).getTime()) / 86400000
-    );
-    const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+    const dayMs = 86400000;
+    const J1970 = 2440588;
+    const J2000 = 2451545;
+    const d = now.valueOf() / dayMs - 0.5 + J1970 - J2000;
 
-    const decl = 23.44 * Math.sin(((360 / 365) * (dayOfYear - 81) * Math.PI) / 180);
-    const declRad = (decl * Math.PI) / 180;
-    const sunLon = ((utcHours - 12) / 12) * Math.PI;
+    // Solar coordinates (same algorithm as SunCalc internals)
+    const M = (Math.PI / 180) * (357.5291 + 0.98560028 * d);
+    const C = (Math.PI / 180) * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+    const L = M + C + (Math.PI / 180) * 102.9372 + Math.PI;
+    const e = (Math.PI / 180) * 23.4397;
+    const decl = Math.asin(Math.sin(e) * Math.sin(L));
 
-    // Sun direction in Three.js world space.
-    // Three.js SphereGeometry UV: U=0→-X(90°W), U=0.5→+X(90°E), U=0.75→-Z(0°)
-    // Standard equirectangular: U=0→-180°, U=0.5→0°
-    // Offset: Three.js -Z face (U=0.75) maps to texture 90°E, not 0°.
-    // Fix: rotate sunDir by -90° around Y to align with texture geography.
-    // Subsolar position → rotate(-90°Y) → sunDir
-    const cosDec = Math.cos(declRad);
-    const x = cosDec * Math.cos(sunLon);
-    const y = Math.sin(declRad);
-    const z = -cosDec * Math.sin(sunLon);
+    // Subsolar longitude: RA - GMST (sun's hour angle at Greenwich)
+    const gmstDeg = 280.16 + 360.9856235 * d;
+    const ra = Math.atan2(Math.sin(L) * Math.cos(e), Math.cos(L));
+    const sunLonRad = ra - ((gmstDeg * Math.PI) / 180);
+
+    // Three.js world-space direction (SphereGeometry UV convention)
+    const x = Math.cos(decl) * Math.cos(sunLonRad);
+    const y = Math.sin(decl);
+    const z = -Math.cos(decl) * Math.sin(sunLonRad);
 
     matRef.current.uniforms.uSunDir.value.set(x, y, z);
   });
